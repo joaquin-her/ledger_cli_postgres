@@ -16,11 +16,11 @@ defmodule Ledger.CLI do
         command = String.split(command, "_")
         case command do
           [verbo, "moneda"] ->
-            Commands.Monedas.run(verbo, arguments)
+            Commands.Monedas.run(String.to_atom(verbo), arguments)
           [verbo, "usuario"] ->
-            Commands.Usuario.run(verbo, arguments)
+            Commands.Usuario.run(String.to_atom(verbo), arguments)
           _ ->
-            Commands.Transacciones.run(command, arguments)
+            Commands.Transacciones.run(String.to_atom(command), arguments)
         end
     end
   end
