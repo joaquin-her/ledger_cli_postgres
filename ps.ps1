@@ -15,8 +15,17 @@ function Test {
 
 function Run {
     Write-Host "Running Iex Iterative..."
-    # Example: Run unit tests
     iex.bat -S mix  
+}
+
+function Bash {
+    Write-Host "Running bash..."
+    Build
+    docker compose run --rm ledger sh
+}
+
+function Compose-Up {
+    docker-compose up -d --remove-orphans
 }
 
 # Allow calling specific functions from the command line
