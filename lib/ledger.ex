@@ -1,4 +1,4 @@
-defmodule Ledger do
+defmodule Ledger.CLI do
   @moduledoc """
   Documentation for `Ledger`.
   """
