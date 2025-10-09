@@ -5,8 +5,8 @@ defmodule Ledger.Schemas.Moneda do
   schema "monedas" do
     field :nombre, :string
     field :precio_en_usd, :float
-    field :inserted_at, :string
-    field :updated_at, :string
+    field :inserted_at, :naive_datetime
+    field :updated_at, :naive_datetime
   end
 
   def changeset(moneda \\ %Ledger.Schemas.Moneda{}, attrs) do

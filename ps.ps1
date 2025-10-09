@@ -25,7 +25,7 @@ function Bash {
 }
 
 function Compose-Up {
-    docker-compose up -d --remove-orphans
+    docker-compose up -d --remove-orphans $args[1]
 }
 
 # Allow calling specific functions from the command line

@@ -9,6 +9,8 @@ services:
       - POSTGRES_DB=ledger_db
       - POSTGRES_PASSWORD=postgres
       - PGDATA=/var/lib/postgresql/data/pgdata
+    networks:
+      - app_network
     volumes:
       - ./.volumes/postgres/data:/var/lib/postgresql/data/
   pgadmin:
@@ -24,7 +26,13 @@ services:
     build: .
     volumes:
       - .:/app
+    depends_on: 
+      - postgres
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@db:5432/ledger_dev"
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/ledger_db"
     stdin_open: true
     tty: true
+
+networks:
+  app_network:
+    driver: bridge
