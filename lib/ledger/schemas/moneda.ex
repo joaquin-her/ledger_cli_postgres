@@ -14,7 +14,7 @@ defmodule Ledger.Schemas.Moneda do
     |> Changeset.cast(attrs, [:nombre, :precio_en_usd])
     |> Changeset.validate_required([:nombre, :precio_en_usd])
     |> Changeset.validate_length(:nombre, min: 3, max: 4)
-    |> Changeset.unique_constraint(:nombre)
+    |> Changeset.validate_number(:precio_en_usd, greater_than: 0)
     |> Changeset.update_change(:nombre, fn nombre -> String.upcase(nombre) end)
   end
 end

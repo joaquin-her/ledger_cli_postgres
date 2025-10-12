@@ -26,4 +26,17 @@ defmodule TestCommandMonedas do
     error = {:error, "crear_usuario: nombre: should be at most 4 character(s)"}
     assert Monedas.run(:crear, args)  == error
   end
+
+  test "ingresar moneda con nombre de menos de 3 letras da error " do
+    args = %{"-n" => "US", "-p" => "1.0"}
+    error = {:error, "crear_usuario: nombre: should be at least 3 character(s)"}
+    assert Monedas.run(:crear, args)  == error
+  end
+
+  test "ingresar moneda con precio negativo da error " do
+    args = %{"-n" => "USDT", "-p" => "-1.0"}
+    error = {:error, "crear_usuario: precio_en_usd: must be greater than 0"}
+    assert Monedas.run(:crear, args)  == error
+  end
+
 end
