@@ -8,10 +8,14 @@ defmodule Ledger.Commands.Monedas do
       nombre: args["-n"],
       precio_en_usd: String.to_float(args["-p"])
     }
-    changeset = Moneda.changeset(%Moneda{}, moneda)
-    changeset
-    |> Ledger.Repo.insert!()
-
+    Moneda.changeset(%Moneda{}, moneda)
+    |> Ledger.Repo.insert()
+    |> case do
+      {:ok, moneda} ->
+        {:ok, moneda}
+      {:error, changeset} ->
+        {:error, "crear_usuario: #{format_errors(changeset)}"}
+    end
   end
 
   # edita una moneda
@@ -36,6 +40,17 @@ defmodule Ledger.Commands.Monedas do
 
   def run(operation, args) do
     IO.puts("Running monedas with operation: #{operation} args: \n#{inspect(args)}")
+  end
+
+  # Helper para formatear errores
+  defp format_errors(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", to_string(value))
+      end)
+    end)
+    |> Enum.map(fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
+    |> Enum.join("; ")
   end
 
 end

@@ -28,6 +28,11 @@ function Compose-Up {
     docker-compose up -d --remove-orphans $args[1]
 }
 
+function cover {
+    Write-Host "Running coverage..."
+    mix test --cover
+}
+
 # Allow calling specific functions from the command line
 if ($args.Count -gt 0) {
     Invoke-Expression "$($args[0])"
