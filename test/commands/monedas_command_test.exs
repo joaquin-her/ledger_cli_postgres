@@ -8,10 +8,17 @@ defmodule TestCommandMonedas do
   end
 
   test "crear moneda" do
-    esperado = %Moneda{nombre: "USDT", precio_en_usd: 1.0}
     args = %{"-n" => "USDT", "-p" => "1.0"}
-    resultado = Monedas.run( :crear, args )
-    assert esperado == resultado
+    resultado = Monedas.run(:crear, args)
+
+    # Verifica el resultado inmediato
+    assert resultado.nombre == "USDT"
+    assert resultado.precio_en_usd == 1.0
+
+    # Verifica que se persistió correctamente
+    moneda_guardada = Ledger.Repo.get(Moneda, resultado.id)
+    assert moneda_guardada.nombre == "USDT"
+    assert moneda_guardada.precio_en_usd == 1.0
   end
 
 end

@@ -10,7 +10,8 @@ defmodule Ledger.Commands.Monedas do
     }
     changeset = Moneda.changeset(%Moneda{}, moneda)
     changeset
-    |> Ledger.Repo.insert()
+    |> Ledger.Repo.insert!()
+
   end
 
   # edita una moneda
