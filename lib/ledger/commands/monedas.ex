@@ -39,8 +39,19 @@ defmodule Ledger.Commands.Monedas do
   end
 
   # borra una moneda
-  def run(:borrar, _) do
+  def run(:borrar, args) do
+    id = String.to_integer(args["-id"])
 
+    with %Moneda{} = moneda <- Repo.get(Moneda, id),
+        {:ok, moneda_eliminada} <- Repo.delete(moneda) do
+      {:ok, moneda_eliminada}
+    else
+      nil ->
+        {:error, "borrar_moneda: Moneda no encontrada con el ID proporcionado"}
+
+      {:error, changeset} ->
+        {:error, "eliminar_moneda: #{format_errors(changeset)}"}
+    end
   end
 
   # lista una moneda
