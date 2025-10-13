@@ -9,7 +9,8 @@ defmodule Ledger.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       escript: escripts(),
-      name: "ledger"
+      name: "ledger",
+      aliases: aliases()
     ]
   end
 
@@ -31,6 +32,12 @@ defmodule Ledger.MixProject do
       # {:dep_from_hexpm, "~> 0.3.0"},
       {:ecto_sql, "~> 3.10" },
       {:postgrex, ">= 0.0.0"}
+    ]
+  end
+
+  defp aliases do
+    [
+     "remake-db": ["ecto.drop "," ecto.create "," ecto.migrate"]
     ]
   end
 end
