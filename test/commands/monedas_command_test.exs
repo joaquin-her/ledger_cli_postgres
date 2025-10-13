@@ -22,6 +22,35 @@ defmodule TestCommandMonedas do
     assert moneda_guardada.inserted_at != nil
   end
 
+  test "obtener moneda existente = :ok" do
+    args = %{"-n" => "USDT", "-p" => "1.0"}
+    {_, resultado} = Monedas.run(:crear, args)
+    {status, moneda} = Monedas.run(:ver, %{"-id" => "#{resultado.id}"})
+    assert status == :ok
+    assert moneda.nombre == "USDT"
+    assert moneda.precio_en_usd == 1.0
+  end
+
+  test "obtener moneda inexistente = :error" do
+    {status, mensaje} = Monedas.run(:ver, %{"-id" => "999"})
+    esperado = "ver_moneda: Moneda no encontrada"
+    assert status == :error
+    assert mensaje == esperado
+  end
+
+  test "obtener todas las monedas con -id='all'= :ok" do
+    args = %{"-n" => "USDT", "-p" => "1.0"}
+    Monedas.run(:crear, args)
+    args = %{"-n" => "BTC", "-p" => "100.0"}
+    Monedas.run(:crear, args)
+    args = %{"-n" => "ETH", "-p" => "1022.0"}
+    Monedas.run(:crear, args)
+
+    {status, monedas} = Monedas.run(:ver, %{"-id" => "all"})
+    assert status == :ok
+    assert Enum.all?(monedas, fn m -> m.nombre in ["USDT", "BTC", "ETH"] end)
+  end
+
   test "ingresar moneda con nombre de mas de 4 letras da error " do
     args = %{"-n" => "dolar", "-p" => "1.0"}
     error = {:error, "crear_usuario: nombre: should be at most 4 character(s)"}
@@ -74,8 +103,9 @@ defmodule TestCommandMonedas do
     {_, moneda} = Monedas.run(:crear, argumentos_creacion)
     argumentos_modificacion  = %{"-id" => "#{moneda.id}", "-p" => "2000.0"}
     {status, moneda} = Monedas.run(:editar, argumentos_modificacion)
+    moneda_modificada = Ledger.Repo.get( Moneda, moneda.id)
     assert status == :ok
-    assert moneda.precio_en_usd == 2000.0
+    assert moneda_modificada.precio_en_usd == 2000.0
   end
 
   test "modificar id de moneda no existe = :error,msg" do

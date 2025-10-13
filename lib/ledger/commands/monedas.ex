@@ -58,9 +58,14 @@ defmodule Ledger.Commands.Monedas do
   def run(:ver, args) do
     case args["-id"] do
       "all" ->
-        Repo.all(Moneda)
+        {:ok, Repo.all(Moneda)}
       id ->
-        Repo.get!(Moneda, String.to_integer(id))
+         case Repo.get(Moneda, String.to_integer(id)) do
+           nil ->
+             {:error, "ver_moneda: Moneda no encontrada"}
+           moneda ->
+             {:ok, moneda}
+        end
     end
   end
 
