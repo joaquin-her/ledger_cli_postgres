@@ -100,4 +100,80 @@ defmodule TestCommandMonedas do
     assert status == :error
     assert error == "editar_moneda: id: is invalid"
   end
+
+  test "modificar una moneda cambia su campo updated_at" do
+    # inicial
+    argumentos_creacion = %{"-n" => "ETH", "-p" => "3600.0"}
+    {_, moneda} = Monedas.run(:crear, argumentos_creacion)
+    updated_at_before = moneda.updated_at
+    # modifica la moneda
+    argumentos_modificacion  = %{"-id" => "#{moneda.id}", "-p" => "2500.0"}
+    {status, moneda} = Monedas.run(:editar, argumentos_modificacion)
+    assert status == :ok
+    assert updated_at_before < moneda.updated_at
+  end
+
+  # borrado de monedas
+  test "borrar una moneda existente" do
+    # Crear moneda
+    argumentos_creacion = %{"-n" => "ETH", "-p" => "3600.0"}
+    {:ok, moneda} = Monedas.run(:crear, argumentos_creacion)
+
+    # borrar
+    argumentos_eliminacion = %{"-id" => "#{moneda.id}"}
+    {:ok, moneda_eliminada} = Monedas.run(:borrar, argumentos_eliminacion)
+
+    # Verificar que se eliminó
+    assert moneda_eliminada.id == moneda.id
+    assert Ledger.Repo.get(Moneda, moneda.id) == nil
+  end
+
+  test "borrar una moneda que no existe retorna error" do
+    argumentos_eliminacion = %{"-id" => "99999"}
+    esperado = "borrar_moneda: Moneda no encontrada con el ID proporcionado"
+    {status, mensaje} = Monedas.run(:borrar, argumentos_eliminacion)
+    assert status == :error
+    assert mensaje == esperado
+  end
+
+  # Test con refetch para confirmar
+  test "borrar una moneda la remueve de la base de datos" do
+    {:ok, moneda} = Monedas.run(:crear, %{"-n" => "BTC", "-p" => "50000.0"})
+    id = moneda.id
+
+    # Confirmar que existe
+    assert Ledger.Repo.get(Moneda, id) != nil
+
+    # borrar
+    {:ok, _} = Monedas.run(:borrar, %{"-id" => "#{id}"})
+
+    # Confirmar que ya no existe
+    refute Ledger.Repo.get(Moneda, id)
+  end
+
+  # Test con conteo de registros
+  test "borrar reduce el conteo de monedas" do
+    {:ok, moneda} = Monedas.run(:crear, %{"-n" => "ADA", "-p" => "1.50"})
+
+    count_before = Ledger.Repo.aggregate(Moneda, :count, :id)
+    {:ok, _} = Monedas.run(:borrar, %{"-id" => "#{moneda.id}"})
+    count_after = Ledger.Repo.aggregate(Moneda, :count, :id)
+
+    assert count_after == count_before - 1
+  end
+
+  test "no se puede borrar una moneda con transacciones asociadas" do
+    {:ok, moneda} = Monedas.run(:crear, %{"-n" => "DOGE", "-p" => "0.10"})
+
+    # Crear una transacción asociada
+    Ledger.Repo.insert!(%Ledger.Schemas.Transaccion{moneda_origen_id: moneda.id, monto: 100})
+
+    # Intentar borrar debería fallar
+    assert {:error, mensaje} = Monedas.run(:borrar, %{"-id" => "#{moneda.id}"})
+    assert mensaje =~ "asociadas" # o el mensaje de error que uses
+
+    # Confirmar que la moneda sigue existiendo
+    assert Repo.get(Moneda, moneda.id) != nil
+  end
+
 end
