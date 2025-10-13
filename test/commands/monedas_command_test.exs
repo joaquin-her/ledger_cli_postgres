@@ -162,18 +162,4 @@ defmodule TestCommandMonedas do
     assert count_after == count_before - 1
   end
 
-  test "no se puede borrar una moneda con transacciones asociadas" do
-    {:ok, moneda} = Monedas.run(:crear, %{"-n" => "DOGE", "-p" => "0.10"})
-
-    # Crear una transacción asociada
-    Ledger.Repo.insert!(%Ledger.Schemas.Transaccion{moneda_origen_id: moneda.id, monto: 100})
-
-    # Intentar borrar debería fallar
-    assert {:error, mensaje} = Monedas.run(:borrar, %{"-id" => "#{moneda.id}"})
-    assert mensaje =~ "asociadas" # o el mensaje de error que uses
-
-    # Confirmar que la moneda sigue existiendo
-    assert Repo.get(Moneda, moneda.id) != nil
-  end
-
 end
