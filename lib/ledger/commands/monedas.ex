@@ -6,7 +6,7 @@ defmodule Ledger.Commands.Monedas do
   def run(:crear, args) do
     moneda = %{
       nombre: args["-n"],
-      precio_en_usd: String.to_float(args["-p"])
+      precio_en_usd: args["-p"]
     }
     Moneda.changeset(%Moneda{}, moneda)
     |> Ledger.Repo.insert()
@@ -19,7 +19,22 @@ defmodule Ledger.Commands.Monedas do
   end
 
   # edita una moneda
-  def run(:editar, _) do
+  def run(:editar, args) do
+    case Integer.parse(args["-id"]) do
+      :error -> {:error, "editar_moneda: id: is invalid"}
+      {id, _} ->
+        with %Moneda{} = moneda <- Repo.get(Moneda, id),
+            changeset <- Moneda.changeset(moneda, %{precio_en_usd: args["-p"]}),
+            {:ok, moneda_actualizada} <- Repo.update(changeset) do
+          {:ok, moneda_actualizada}
+        else
+          {:error, changeset} ->
+            {:error, "editar_moneda: #{format_errors(changeset)}"}
+          nil ->
+            {:error, "editar_moneda: moneda no encontrada"}
+        end
+
+    end
 
   end
 
