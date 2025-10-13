@@ -19,6 +19,7 @@ defmodule TestCommandMonedas do
     moneda_guardada = Ledger.Repo.get(Moneda, resultado.id)
     assert moneda_guardada.nombre == "USDT"
     assert moneda_guardada.precio_en_usd == 1.0
+    assert moneda_guardada.inserted_at != nil
   end
 
   test "ingresar moneda con nombre de mas de 4 letras da error " do
@@ -39,4 +40,30 @@ defmodule TestCommandMonedas do
     assert Monedas.run(:crear, args)  == error
   end
 
+  test "ingresar moneda con precio 0 da error " do
+    args = %{"-n" => "USDT", "-p" => "0.0"}
+    error = {:error, "crear_usuario: precio_en_usd: must be greater than 0"}
+    assert Monedas.run(:crear, args)  == error
+  end
+
+  test "ingresar moneda con nombre repetido genera error" do
+    args = %{"-n" => "BTC", "-p" => "3600.0"}
+    Monedas.run(:crear, args)
+    args = %{"-n" => "BTC", "-p" => "2500.0"}
+    error = {:error, "crear_usuario: nombre: has already been taken"}
+    assert Monedas.run(:crear, args) == error
+  end
+
+  test "ingresar moneda con nombre vacio genera error" do
+    args = %{"-n" => "", "-p" => "3600.0"}
+    error = {:error, "crear_usuario: nombre: can't be blank"}
+    assert Monedas.run(:crear, args) == error
+  end
+
+  test "ingresar moneda con timestamp de creacion" do
+    args = %{"-n" => "ETH", "-p" => "2000.0"}
+    {status, moneda} = Monedas.run(:crear, args)
+    resultado = Ledger.Repo.get( Moneda, moneda.id)
+    assert not is_nil(resultado.inserted_at )
+  end
 end
