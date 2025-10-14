@@ -19,8 +19,16 @@ defmodule Ledger.CLI do
             Commands.Monedas.run(String.to_atom(verbo), arguments)
           [verbo, "usuario"] ->
             Commands.Usuario.run(String.to_atom(verbo), arguments)
+          [verbo, "cuenta"] ->
+            Commands.Cuentas.run(String.to_atom(verbo), arguments)
+          ["ver", "transaccion"] ->
+            Commands.Transacciones.run(:ver, arguments)
+          ["realizar", tipo] ->
+            Commands.Transacciones.run(:crear, tipo, arguments)
+          ["deshacer", tipo] ->
+            Commands.Transacciones.run(:borrar, tipo, arguments)
           _ ->
-            Commands.Transacciones.run(String.to_atom(command), arguments)
+            {:error, "ledgerCLI: Commando desconocido"}
         end
     end
   end
