@@ -1,7 +1,20 @@
 defmodule Ledger.Commands.Usuario do
+  alias Ledger.Schemas.Usuario
 
   # crea un usuario
-  def run(:crear, _) do
+  def run(:crear, args) do
+    usuario = %{
+      username: args["-n"],
+      birth_date: args["-b"]
+    }
+    Usuario.changeset(%Usuario{}, usuario)
+    |> Ledger.Repo.insert()
+    |> case do
+      {:ok, usuario} ->
+        {:ok, usuario}
+      {:error, changeset} ->
+        {:error, "crear_usuario: #{format_errors(changeset)}"}
+    end
   end
 
   # edita un usuario
@@ -21,6 +34,16 @@ defmodule Ledger.Commands.Usuario do
 
   def run(command, args) do
     IO.puts("Running usuario with command: #{command} and args: \n#{inspect(args)}")
+  end
+
+  defp format_errors(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Enum.reduce(opts, msg, fn {key, value}, acc ->
+        String.replace(acc, "%{#{key}}", to_string(value))
+      end)
+    end)
+    |> Enum.map(fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
+    |> Enum.join("; ")
   end
 
 end
