@@ -31,4 +31,35 @@ query = from m in Ledger.Schemas.Moneda, where: m.precio_en_usd > 10
 monedas = Repo.all(query)
 ```
 
-For more information on how to use Ecto, you can refer to the [Ecto documentation](https://hexdocs.pm/ecto/Ecto.html).
+## Associations
+
+USUARIO
+  has_many :cuentas
+
+CUENTA
+  belongs_to :usuario
+  belongs_to :moneda
+  has_many :transacciones_origen
+  has_many :transacciones_destino
+
+MONEDA
+  has_many :cuentas
+  has_many :transacciones_origen
+  has_many :transacciones_destino
+
+TRANSACCION
+  belongs_to :usuario
+  belongs_to :cuenta_origen (Cuenta)
+  belongs_to :cuenta_destino (Cuenta)
+  belongs_to :moneda_origen (Moneda)
+  belongs_to :moneda_destino (Moneda)
+
+## swap
+- pide argumentos
+- valida si usuario tiene cuentas con los nombres "moneda_o" y "moneda_d
+    - "error, no se puede hacer swap entre monedas de usuarios distintos"
+- valida si el monto es valido
+- valida que la cuenta tenga la cantidad suficiente (monto <= cuenta_origen.monto)
+- calcula el valor en dolares del monto :monto_en_dolares
+- hace la conversion de :monto_en_dolares a :moneda_destino segun su valor en :monedas
+- 

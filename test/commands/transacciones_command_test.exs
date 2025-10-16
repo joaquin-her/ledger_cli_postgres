@@ -38,7 +38,6 @@ defmodule Commands.TransaccionesCommandTest do
     #act
     args = %{"-u"=>"#{usuario.id}", "-m"=>"#{moneda.nombre}", "-a"=> "15"}
     {status, transaccion} = Transacciones.run(:crear, "alta_cuenta", args)
-    IO.inspect(transaccion)
     #assert
     assert status == :ok
     transaccion_obtenida = Ledger.Repo.get(Transaccion, transaccion.id)

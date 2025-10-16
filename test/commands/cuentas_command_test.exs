@@ -19,4 +19,9 @@ defmodule Commands.CuentasCommandTest do
     cuenta = Ledger.Repo.get( Ledger.Schemas.Cuenta, cuenta.id)
     assert cuenta != nil
   end
+
+  test "se pueden crear varias cuentas para un mismo usuario con monedas distintas" do
+
+  end
+
 end

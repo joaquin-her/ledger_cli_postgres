@@ -9,8 +9,8 @@ defmodule Ledger.Schemas.Cuenta do
     #field :monto, :decimal
     belongs_to :usuario, Usuario
     belongs_to :moneda, Moneda
-    has_many :transacciones_origen, Transaccion, foreign_key: :usuario_origen_id
-    has_many :transacciones_destino, Transaccion, foreign_key: :usuario_destino_id
+    has_many :transacciones_origen, Transaccion, foreign_key: :cuenta_origen_id
+    has_many :transacciones_destino, Transaccion, foreign_key: :cuenta_destino_id
   end
 
   def changeset(cuenta, attrs) do
