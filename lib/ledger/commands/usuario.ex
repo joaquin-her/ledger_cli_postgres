@@ -62,11 +62,15 @@ defmodule Ledger.Commands.Usuarios do
 
   # lista un usuario
   def run(:ver, args) do
-    {id,_} = Integer.parse(args["-id"])
-    case Ledger.Repo.get(Usuario, id) do
-      nil -> {:error, "ver_usuario: usuario no encontrado"}
-      usuario ->
-        {:ok, usuario}
+    case Integer.parse(args["-id"]) do
+        :error -> {:error, "ver_usuario: id invalido"}
+        {id, _} when id < 0 -> {:error, "ver_usuario: :id no puede ser negativo"}
+        {id, _} ->
+          case Ledger.Repo.get(Usuario, id) do
+            nil -> {:error, "ver_usuario: usuario no encontrado"}
+            usuario ->
+              {:ok, usuario}
+            end
     end
   end
 

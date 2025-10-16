@@ -126,6 +126,19 @@ defmodule Commands.UsuariosCommandTest do
     assert usuario_obtenido.id == usuario.id
     assert usuario_obtenido.nombre_usuario == usuario.nombre_usuario
     assert usuario_obtenido.fecha_nacimiento == usuario.fecha_nacimiento
-    IO.inspect(usuario_obtenido)
+  end
+
+  test "no se puede obtener un usuario que no existe" do
+    args = %{"-id" => "1000000000"}
+    {status, mensaje} = Usuarios.run(:ver, args)
+    assert status == :error
+    assert mensaje == "ver_usuario: usuario no encontrado"
+  end
+
+  test "un id negativo no permite ver a un usuario" do
+    args = %{"-id" => "-1"}
+    {status, mensaje} = Usuarios.run(:ver, args)
+    assert status == :error
+    assert mensaje == "ver_usuario: :id no puede ser negativo"
   end
 end
