@@ -114,4 +114,18 @@ defmodule Commands.UsuariosCommandTest do
     assert status == :error
     assert mensaje == "borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas"
   end
+
+  test "se puede obtener un usuario correctamente" do
+    args = %{"-n"=> "santiago_cocodrilo2", "-b"=> "2005-12-20" }
+    {status, usuario} = Usuarios.run(:crear, args)
+    assert status == :ok
+
+    args_necesarios = %{"-id"=> "#{usuario.id}"}
+    {status, usuario_obtenido} = Usuarios.run(:ver, args_necesarios)
+    assert status == :ok
+    assert usuario_obtenido.id == usuario.id
+    assert usuario_obtenido.nombre_usuario == usuario.nombre_usuario
+    assert usuario_obtenido.fecha_nacimiento == usuario.fecha_nacimiento
+    IO.inspect(usuario_obtenido)
+  end
 end

@@ -62,8 +62,12 @@ defmodule Ledger.Commands.Usuarios do
 
   # lista un usuario
   def run(:ver, args) do
-    id = Integer.parse(args["-id"])
-    Ledger.Repo.get!(Usuario, id)
+    {id,_} = Integer.parse(args["-id"])
+    case Ledger.Repo.get(Usuario, id) do
+      nil -> {:error, "ver_usuario: usuario no encontrado"}
+      usuario ->
+        {:ok, usuario}
+    end
   end
 
   def run(command, args) do
