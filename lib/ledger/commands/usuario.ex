@@ -38,8 +38,18 @@ defmodule Ledger.Commands.Usuarios do
   end
 
   # borra un usuario
-  def run(:borrar, _) do
-
+  def run(:borrar, args) do
+    case Integer.parse(args["-id"]) do
+      :error -> {:error, "id no es un numero"}
+      {id, _} ->
+        Ledger.Repo.get!(Usuario, id)
+        |> Ledger.Repo.delete()
+        |> case do
+          {:ok, usuario} -> {:ok, usuario}
+          {:error, changeset} ->
+            {:error, "borrar_usuario: #{format_errors(changeset)}"}
+          end
+        end
   end
 
   # lista un usuario
