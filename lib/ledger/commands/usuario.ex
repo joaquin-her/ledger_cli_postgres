@@ -17,7 +17,6 @@ defmodule Ledger.Commands.Usuarios do
     end
   end
 
-  # edita un usuario
   def run(:editar, args) do
     usuario = %{
       nombre_usuario: args["-n"],
@@ -73,7 +72,12 @@ defmodule Ledger.Commands.Usuarios do
             end
     end
   end
-
+  @doc """
+    usuario = %{\n
+      nombre_usuario: args["-n"],\n
+      fecha_nacimiento: args["-b"]\n
+    }
+  """
   def run(command, args) do
     IO.puts("Running usuario with command: #{command} and args: \n#{inspect(args)}")
   end
