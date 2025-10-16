@@ -1,11 +1,11 @@
-defmodule Ledger.Commands.Usuario do
+defmodule Ledger.Commands.Usuarios do
   alias Ledger.Schemas.Usuario
 
   # crea un usuario
   def run(:crear, args) do
     usuario = %{
-      username: args["-n"],
-      birth_date: args["-b"]
+      nombre_usuario: args["-n"],
+      fecha_nacimiento: args["-b"]
     }
     Usuario.changeset(%Usuario{}, usuario)
     |> Ledger.Repo.insert()

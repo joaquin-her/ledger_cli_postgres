@@ -18,7 +18,7 @@ defmodule Ledger.CLI do
           [verbo, "moneda"] ->
             Commands.Monedas.run(String.to_atom(verbo), arguments)
           [verbo, "usuario"] ->
-            Commands.Usuario.run(String.to_atom(verbo), arguments)
+            Commands.Usuarios.run(String.to_atom(verbo), arguments)
           [verbo, "cuenta"] ->
             Commands.Cuentas.run(String.to_atom(verbo), arguments)
           ["ver", "transaccion"] ->
