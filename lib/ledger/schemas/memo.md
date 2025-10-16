@@ -4,6 +4,7 @@ This schema represents a currency with a name and a price in USD.
 To use this schema, you'll need to have Ecto installed and set up in your project. You'll also need a Repo module that is configured to connect to your database.
 ## Inserting Data
 You can insert data into the Moneda table using the `insert/2` function from Ecto.Repo. Here's an example:
+#Ledger.Commands.Usuario.run( :crear, %{"-n"=>"Fabrizzio_el_maestro_de_maestros@gmail", "-b"=>"2004-04-20"})
 
 ## Updating Data
 To update data in the Moneda table, you can use the `update/2` function from Ecto.Repo. Here's an example:

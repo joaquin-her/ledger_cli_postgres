@@ -1,6 +1,6 @@
 defmodule Ledger.Commands.Usuarios do
   alias Ledger.Schemas.Usuario
-
+  alias Ledger.Commands.Utils
   # crea un usuario
   def run(:crear, args) do
     usuario = %{
@@ -13,7 +13,7 @@ defmodule Ledger.Commands.Usuarios do
       {:ok, usuario} ->
         {:ok, usuario}
       {:error, changeset} ->
-        {:error, "crear_usuario: #{format_errors(changeset)}"}
+        {:error, "crear_usuario: #{Utils.format_errors(changeset)}"}
     end
   end
 
@@ -32,7 +32,7 @@ defmodule Ledger.Commands.Usuarios do
           {:ok, usuario_modificado} ->
             {:ok, usuario_modificado}
           {:error, changeset} ->
-            {:error, "editar_usuario: #{format_errors(changeset)}"}
+            {:error, "editar_usuario: #{Utils.format_errors(changeset)}"}
         end
     end
   end
@@ -42,33 +42,32 @@ defmodule Ledger.Commands.Usuarios do
     case Integer.parse(args["-id"]) do
       :error -> {:error, "id no es un numero"}
       {id, _} ->
-        Ledger.Repo.get!(Usuario, id)
-        |> Ledger.Repo.delete()
-        |> case do
-          {:ok, usuario} -> {:ok, usuario}
-          {:error, changeset} ->
-            {:error, "borrar_usuario: #{format_errors(changeset)}"}
-          end
+        try do
+          Ledger.Repo.get!(Usuario, id)
+          |> Ledger.Repo.delete()
+          |> case do
+            {:ok, _usuario} ->
+              {:ok, "borrar_usuario: usuario eliminado correctamente"}
+            {:error, changeset} ->
+              {:error, "borrar_usuario: #{Utils.format_errors(changeset)}"}
+            end
+        rescue
+          Ecto.ConstraintError ->
+            {:error, "borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas"}
+          e ->
+            {:error, "borrar_usuario: error al intentar eliminar al usuario #{inspect(e)}"}
         end
+    end
   end
 
   # lista un usuario
-  def run(:ver, _) do
-
+  def run(:ver, args) do
+    id = Integer.parse(args["-id"])
+    Ledger.Repo.get!(Usuario, id)
   end
 
   def run(command, args) do
     IO.puts("Running usuario with command: #{command} and args: \n#{inspect(args)}")
-  end
-
-  defp format_errors(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-      Enum.reduce(opts, msg, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", to_string(value))
-      end)
-    end)
-    |> Enum.map(fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
-    |> Enum.join("; ")
   end
 
 end

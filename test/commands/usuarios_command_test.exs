@@ -78,4 +78,40 @@ defmodule Commands.UsuariosCommandTest do
     assert mensaje == "editar_usuario: nombre_usuario: has already been taken"
   end
 
+  test "el cambio de nombre de usuario no puede ser el mismo que ya tenia antes" do
+    args = %{"-n"=> "pedro_loro", "-b" => "2005-10-20"}
+    {status, usuario} = Usuarios.run(:crear, args)
+    assert status == :ok
+
+    args2 = %{"-n"=> "pedro_loro", "-id"=> "#{usuario.id}"}
+    {status, mensaje} = Usuarios.run(:editar, args2)
+    assert status == :error
+    assert mensaje == "editar_usuario: nombre_usuario: El nombre de usuario debe ser diferente al actual"
+  end
+
+  test "se puede eliminar a un usuario" do
+    args = %{"-n"=> "santiago_cocodrilo2", "-b"=> "2005-12-20" }
+    {status, usuario} = Usuarios.run(:crear, args)
+    assert status == :ok
+
+    {status, usuario_eliminado} = Usuarios.run(:borrar, %{"-id" => "#{usuario.id}"})
+    assert status == :ok
+    assert usuario_eliminado != nil
+  end
+
+  test "no se puede eliminar a un usuario con una cuenta y transacciones asociadas" do
+    args = %{"-n"=> "roberto_zapato", "-b"=> "1990-12-02" }
+    {status, usuario} = Usuarios.run(:crear, args)
+    assert status == :ok
+
+    {_, moneda} = Ledger.Commands.Monedas.run(:crear, %{"-n"=>"BTC", "-p"=>"3000.0"})
+    # una alta cuenta es una transaccion porque agrega un monto a una cuenta del usuario en una monea determinada
+    {status, _} = Ledger.Commands.Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m"=>"#{moneda.id}", "-a"=>"2.0"})
+    assert status == :ok
+
+    args = %{"-id" => "#{usuario.id}"}
+    {status, mensaje} = Usuarios.run(:borrar, args)
+    assert status == :error
+    assert mensaje == "borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas"
+  end
 end

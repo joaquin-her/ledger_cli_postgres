@@ -2,12 +2,14 @@ defmodule Ledger.Schemas.Usuario do
   use Ecto.Schema
   alias Ecto.Changeset
   alias Ledger.Schemas.Transaccion
+  alias Ledger.Schemas.Cuenta
 
   schema "usuarios" do
     field :nombre_usuario , :string
     field :fecha_nacimiento, :date
-    has_many :transacciones_origen, Transaccion, foreign_key: :usuario_origen_id
-    has_many :transacciones_destino, Transaccion, foreign_key: :usuario_destino_id
+    has_many :transacciones_origen, Transaccion
+    has_many :transacciones_destino, Transaccion
+    has_many :cuentas, Cuenta
     timestamps(inserted_at: :created_at)
   end
 
@@ -19,6 +21,9 @@ defmodule Ledger.Schemas.Usuario do
     |> validar_es_mayor_de_edad()
     |> Changeset.unique_constraint(:nombre_usuario)
     |> Changeset.validate_length(:nombre_usuario, min: 1)
+    |> Changeset.cast_assoc(:cuentas)
+    |> Changeset.cast_assoc(:transacciones_origen)
+    |> Changeset.cast_assoc(:transacciones_destino)
   end
 
   defp validar_es_mayor_de_edad(changeset) do
