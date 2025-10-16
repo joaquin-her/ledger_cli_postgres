@@ -8,8 +8,8 @@ defmodule Ledger.Schemas.Moneda do
     field :inserted_at, :naive_datetime
     field :updated_at, :naive_datetime
     # Asociaciones: una moneda puede estar en múltiples transacciones
-    has_many :transacciones_origen, Transaccion, foreign_key: :moneda_origen_id
-    has_many :transacciones_destino, Transaccion, foreign_key: :moneda_destino_id
+    #has_many :transacciones_origen, Transaccion, foreign_key: :moneda_origen_id
+    #has_many :transacciones_destino, Transaccion, foreign_key: :moneda_destino_id
     has_many :cuentas, Ledger.Schemas.Cuenta, foreign_key: :moneda_id
   end
 

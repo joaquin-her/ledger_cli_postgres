@@ -8,10 +8,10 @@ defmodule Ledger.Schemas.Transaccion do
     field :monto, :decimal
     field :inserted_at, :naive_datetime
     field :updated_at, :naive_datetime
-    belongs_to :moneda_origen_id, Moneda
-    belongs_to :moneda_destino_id, Moneda
-    belongs_to :usuario_origen_id, Usuario
-    belongs_to :usuario_destino_id, Usuario
+    #belongs_to :moneda_origen_id, Moneda
+    #belongs_to :moneda_destino_id, Moneda
+    #belongs_to :usuario_origen_id, Usuario
+    #belongs_to :usuario_destino_id, Usuario
   end
 
   def changeset(transaccion \\ %Ledger.Schemas.Transaccion{}, attrs) do
