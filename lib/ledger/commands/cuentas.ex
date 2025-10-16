@@ -5,9 +5,10 @@ defmodule Ledger.Commands.Cuentas do
   import Ecto.Query
 
   @doc """
-  args:
-  ["-id"]: str (id del usuario)
-  ["-m"]:str (id de la moneda)
+  ## Alta de cuenta:
+  args:\n
+  \t["-id"]: str (id del usuario)\n
+  \t["-m"]:str (id de la moneda)\n
   """
   def run(:alta, args) do
     {id_moneda,_} = Integer.parse(args["-m"])
