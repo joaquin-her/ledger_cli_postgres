@@ -4,7 +4,6 @@ defmodule Ledger.Repo.Migrations.CreateCuentas do
   def change do
 
     create table("cuentas") do
-      add :monto, :decimal, null: false
       add :usuario_id, references(:usuarios, on_delete: :restrict), null: false
       add :moneda_id ,references(:monedas, on_delete: :restrict), null: false
       timestamps(default: fragment("CURRENT_TIMESTAMP"))
