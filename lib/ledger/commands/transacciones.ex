@@ -22,21 +22,21 @@ defmodule Ledger.Commands.Transacciones do
     end
   end
 
-  defp swap( :crear, args) do
+  defp swap( :crear, _) do
 
   end
-  defp swap( :borrar, args) do
+  defp swap( :borrar, _) do
 
   end
   defp swap( _, _) do
     {:error, "subcommando no encontrado"}
   end
 
-  defp transaccion( :crear, args) do
+  defp transaccion( :crear, _) do
 
   end
 
-  defp transaccion( :borrar, args) do
+  defp transaccion( :borrar, _) do
 
   end
   defp transaccion( _, _) do
