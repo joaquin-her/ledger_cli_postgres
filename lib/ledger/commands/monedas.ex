@@ -1,8 +1,30 @@
 defmodule Ledger.Commands.Monedas do
   alias Ledger.Repo
   alias Ledger.Schemas.Moneda
+  alias Ledger.Commands.Utils
 
   # crea una moneda
+  @doc """
+  ## Crear
+  moneda = %{\n
+    nombre: args["-n"],\n
+    precio_en_usd: args["-p"]\n
+  }
+  ## Editar
+  moneda = %{\n
+    id: args["-id"] ,\n
+    nombre: args["-n"],\n
+    precio_en_usd: args["-p"]\n
+  }
+  ## Borarr
+  moneda = %{\n
+    id: args["-id"] ,\n
+  }
+  ## Ver
+  moneda = %{\n
+    id: args["-id"] ,\n
+  }
+  """
   def run(:crear, args) do
     moneda = %{
       nombre: args["-n"],
@@ -14,7 +36,7 @@ defmodule Ledger.Commands.Monedas do
       {:ok, moneda} ->
         {:ok, moneda}
       {:error, changeset} ->
-        {:error, "crear_usuario: #{format_errors(changeset)}"}
+        {:error, "crear_usuario: #{Utils.format_errors(changeset)}"}
     end
   end
 
@@ -29,7 +51,7 @@ defmodule Ledger.Commands.Monedas do
           {:ok, moneda_actualizada}
         else
           {:error, changeset} ->
-            {:error, "editar_moneda: #{format_errors(changeset)}"}
+            {:error, "editar_moneda: #{Utils.format_errors(changeset)}"}
           nil ->
             {:error, "editar_moneda: moneda no encontrada"}
         end
@@ -50,7 +72,7 @@ defmodule Ledger.Commands.Monedas do
         {:error, "borrar_moneda: Moneda no encontrada con el ID proporcionado"}
 
       {:error, changeset} ->
-        {:error, "eliminar_moneda: #{format_errors(changeset)}"}
+        {:error, "eliminar_moneda: #{Utils.format_errors(changeset)}"}
     end
   end
 
@@ -71,17 +93,6 @@ defmodule Ledger.Commands.Monedas do
 
   def run(operation, args) do
     IO.puts("Running monedas with operation: #{operation} args: \n#{inspect(args)}")
-  end
-
-  # Helper para formatear errores
-  defp format_errors(changeset) do
-    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
-      Enum.reduce(opts, msg, fn {key, value}, acc ->
-        String.replace(acc, "%{#{key}}", to_string(value))
-      end)
-    end)
-    |> Enum.map(fn {field, errors} -> "#{field}: #{Enum.join(errors, ", ")}" end)
-    |> Enum.join("; ")
   end
 
 end
