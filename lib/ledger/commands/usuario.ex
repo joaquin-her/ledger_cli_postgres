@@ -18,8 +18,23 @@ defmodule Ledger.Commands.Usuarios do
   end
 
   # edita un usuario
-  def run(:editar, _) do
-
+  def run(:editar, args) do
+    usuario = %{
+      nombre_usuario: args["-n"],
+    }
+    case Integer.parse(args["-id"]) do
+      :error -> {:error, "id no es un numero"}
+      {id, _} ->
+        usuario_a_modificar = Ledger.Repo.get!(Usuario, id)
+        Usuario.changeset(usuario_a_modificar, usuario)
+        |> Ledger.Repo.update()
+        |> case  do
+          {:ok, usuario_modificado} ->
+            {:ok, usuario_modificado}
+          {:error, changeset} ->
+            {:error, "editar_usuario: #{format_errors(changeset)}"}
+        end
+    end
   end
 
   # borra un usuario

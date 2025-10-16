@@ -55,5 +55,27 @@ defmodule Commands.UsuariosCommandTest do
     assert mensaje == "crear_usuario: fecha_nacimiento: is invalid"
   end
 
+  test "el nombre de usuario puede ser modificado" do
+    args = %{"-n"=> "nicolas_perro", "-b" => "2005-10-20"}
+    {_, usuario} = Usuarios.run(:crear, args)
+    assert usuario.nombre_usuario == "nicolas_perro"
+    nuevos_args = %{"-n"=> "nicolas-gato", "-id"=> "#{usuario.id}"}
+    {status, usuario_modificado} = Usuarios.run(:editar, nuevos_args)
+    assert status == :ok
+    assert usuario_modificado.nombre_usuario == "nicolas-gato"
+  end
+
+  test "el nombre de usuario no puede ser modificado con uno ya utilizado" do
+    args = %{"-n"=> "nicolas_perro", "-b" => "2005-10-20"}
+    {status, _} = Usuarios.run(:crear, args)
+    assert status == :ok
+
+    args2 = %{"-n"=> "nicolas_gato", "-b" => "2005-10-22"}
+    {_, usuario_a_modificar} = Usuarios.run(:crear, args2)
+    nuevos_args = %{"-n"=> "nicolas_perro", "-id"=> "#{usuario_a_modificar.id}"}
+    {status, mensaje} = Usuarios.run(:editar, nuevos_args)
+    assert status == :error
+    assert mensaje == "editar_usuario: nombre_usuario: has already been taken"
+  end
 
 end
