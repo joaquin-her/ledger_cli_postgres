@@ -10,7 +10,12 @@ defmodule Ledger.MixProject do
       deps: deps(),
       escript: escripts(),
       name: "ledger",
-      aliases: aliases()
+      aliases: aliases(),
+
+      test_coverage: [
+        summary: [threshold: 80],
+        output: ".volumes/cover"
+      ]
     ]
   end
 
