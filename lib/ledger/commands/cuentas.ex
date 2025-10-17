@@ -54,15 +54,11 @@ defmodule Ledger.Commands.Cuentas do
         where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda,
         select: c
       )
-
-    IO.inspect(query)
-
     case Ledger.Repo.one(query) do
       nil ->
         {:error, "cuenta no encontrada"}
 
       buscada ->
-        IO.inspect(buscada)
         {:ok, buscada}
     end
   end

@@ -20,8 +20,8 @@ defmodule Ledger.Commands.Transacciones do
       "swap" ->
         swap(:crear, args)
 
-      "transaccion" ->
-        transaccion(:crear, args)
+      "transferencia" ->
+        transferencia(:crear, args)
 
       "alta_cuenta" ->
         alta_cuenta(:crear, args)
@@ -36,8 +36,8 @@ defmodule Ledger.Commands.Transacciones do
       "swap" ->
         swap(:borrar, args)
 
-      "transaccion" ->
-        transaccion(:borrar, args)
+      "transferencia" ->
+        transferencia(:borrar, args)
 
       _ ->
         {:error, "subcommando no encontrado"}
@@ -131,13 +131,13 @@ defmodule Ledger.Commands.Transacciones do
     # si no existe: llamamos a Cuentas.run(:alta, args) y con lo que nos devuelve, hacemos la transaccion alta_cuenta con los campos requeridos
   end
 
-  defp transaccion(:crear, _) do
+  defp transferencia(:crear, _) do
   end
 
-  defp transaccion(:borrar, _) do
+  defp transferencia(:borrar, _) do
   end
 
-  defp transaccion(_, _) do
+  defp transferencia(_, _) do
     {:error, "subcommando no encontrado"}
   end
 

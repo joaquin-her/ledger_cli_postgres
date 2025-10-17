@@ -19,7 +19,7 @@ defmodule Ledger.Schemas.Transaccion do
     transaccion
     |> Changeset.cast(attrs, [:tipo, :monto, :moneda_origen_id, :cuenta_origen_id])
     |> Changeset.validate_required([:tipo, :monto, :moneda_origen_id, :cuenta_origen_id])
-    |> Changeset.validate_number(:monto, greater_than: 0)
+    |> Changeset.validate_number(:monto, greater_than_or_equal_to: 0)
     |> Changeset.update_change(:tipo, fn tipo -> String.downcase(tipo) end)
     |> Changeset.foreign_key_constraint(:moneda_origen_id)
     |> Changeset.foreign_key_constraint(:cuenta_origen_id)

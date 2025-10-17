@@ -83,6 +83,31 @@ defmodule Commands.TransaccionesCommandTest do
     assert Enum.count(cuentas_usuario) == 2
   end
 
+  test "se puede realizar una transaccion entre dos usuarios" do
+    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
+    {_, usuario1} = Usuarios.run(:crear, args)
+    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
+    {_, usuario2} = Usuarios.run(:crear, args)
+    args_moneda  = %{"-n" => "BTC", "-p" => "200"}
+    {_, moneda} = Monedas.run(:crear, args_moneda)
+    args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "500"}
+    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "0"}
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
+
+    args_transacciones = %{"-o"=>"#{usuario1.id}","-d"=>"#{usuario2.id}", "-m"=>"#{moneda.id}", "-a"=>"100"}
+    {:ok, t} = Transacciones.run(:crear, "transferencia", args_transacciones)
+
+    transaccion = Ledger.Repo.get(Transaccion, t.id)
+    assert transaccion != nil
+    assert transaccion.monto == Decimal.new(100)
+    assert transaccion.tipo == "transaccion"
+    assert transaccion.moneda_origen_id == moneda.id
+    assert transaccion.moneda_destino_id == moneda.id
+    assert transaccion.cuenta_origen_id == usuario1.id
+    assert transaccion.cuenta_destino_id == usuario2.id
+  end
+
   # Get transacciones
 
   # Update transacciones
