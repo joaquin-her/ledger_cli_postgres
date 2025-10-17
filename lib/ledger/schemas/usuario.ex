@@ -1,14 +1,11 @@
 defmodule Ledger.Schemas.Usuario do
   use Ecto.Schema
   alias Ecto.Changeset
-  alias Ledger.Schemas.Transaccion
   alias Ledger.Schemas.Cuenta
 
   schema "usuarios" do
     field(:nombre_usuario, :string)
     field(:fecha_nacimiento, :date)
-    # has_many :transacciones_origen, Transaccion
-    # has_many :transacciones_destino, Transaccion
     has_many(:cuentas, Cuenta)
     timestamps(inserted_at: :created_at)
   end

@@ -82,6 +82,26 @@ defmodule Ledger.Commands.Monedas do
     end
   end
 
+  # lista una moneda
+  def run(:ver, args) do
+    case args["-id"] do
+      "all" ->
+        {:ok, Repo.all(Moneda)}
+
+      id ->
+        case Repo.get(Moneda, String.to_integer(id)) do
+          nil ->
+            {:error, "ver_moneda: Moneda no encontrada"}
+
+          moneda ->
+            {:ok, moneda}
+        end
+    end
+  end
+  def run(operation, args) do
+    IO.puts("Running monedas with operation: #{operation} args: \n#{inspect(args)}")
+  end
+
   defp eliminar_moneda(moneda) do
     try do
       moneda
@@ -103,24 +123,5 @@ defmodule Ledger.Commands.Monedas do
     end
   end
 
-  # lista una moneda
-  def run(:ver, args) do
-    case args["-id"] do
-      "all" ->
-        {:ok, Repo.all(Moneda)}
 
-      id ->
-        case Repo.get(Moneda, String.to_integer(id)) do
-          nil ->
-            {:error, "ver_moneda: Moneda no encontrada"}
-
-          moneda ->
-            {:ok, moneda}
-        end
-    end
-  end
-
-  def run(operation, args) do
-    IO.puts("Running monedas with operation: #{operation} args: \n#{inspect(args)}")
-  end
 end

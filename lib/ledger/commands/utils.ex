@@ -19,12 +19,12 @@ defmodule Ledger.Commands.Utils do
     end
   end
 
+  def validate_id(_), do: {:error, "ID inválido"}
+
   def validate_id(id, flag) do
     case validate_id(id) do
       {:ok, id} -> {:ok, id}
       {:error, _} -> {:error, "id_invalido: #{flag}"}
     end
   end
-
-  def validate_id(_), do: {:error, "ID inválido"}
 end
