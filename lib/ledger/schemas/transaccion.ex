@@ -42,6 +42,14 @@ defmodule Ledger.Schemas.Transaccion do
     |> Changeset.foreign_key_constraint(:moneda_destino)
   end
 
+  def changeset_transferencia(transaccion, attrs) do
+    transaccion
+    |> changeset(attrs)
+    |> Changeset.cast(attrs, [:moneda_destino_id, :cuenta_destino_id])
+    |> Changeset.foreign_key_constraint(:moneda_destino_id)
+    |> Changeset.foreign_key_constraint(:cuenta_destino_id)
+
+  end
   def validate_valid_account(changeset, account_field) do
     changeset
     |> Changeset.assoc_constraint(account_field)

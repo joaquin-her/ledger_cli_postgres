@@ -38,8 +38,8 @@ defmodule Ledger.Commands.Cuentas do
   end
 
   def run(:ver, args) do
-    with {:ok, id_usuario} <- Utils.validate_id(args["-u"]),
-         {:ok, id_moneda} <- Utils.validate_id(args["-m"]),
+    with {:ok, id_usuario} <- Utils.validate_id(args["-u"], "-u"),
+         {:ok, id_moneda} <- Utils.validate_id(args["-m"], "-m"),
          {:ok, cuenta} <- get_cuenta(id_usuario, id_moneda) do
       {:ok, cuenta}
     else

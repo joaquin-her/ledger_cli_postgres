@@ -19,13 +19,10 @@ defmodule Ledger.Commands.Transacciones do
     case tipo do
       "swap" ->
         swap(:crear, args)
-
       "transferencia" ->
         transferencia(:crear, args)
-
       "alta_cuenta" ->
         alta_cuenta(:crear, args)
-
       _ ->
         {:error, "subcommando no encontrado"}
     end
@@ -35,10 +32,8 @@ defmodule Ledger.Commands.Transacciones do
     case tipo do
       "swap" ->
         swap(:borrar, args)
-
       "transferencia" ->
         transferencia(:borrar, args)
-
       _ ->
         {:error, "subcommando no encontrado"}
     end
@@ -78,19 +73,16 @@ defmodule Ledger.Commands.Transacciones do
 
   defp alta_cuenta(:crear, args) do
     with nombre_moneda <- args["-m"],
-         {:ok, id_usuario} <- Utils.validate_id(args["-u"]) do
+         {:ok, id_usuario} <- Utils.validate_id(args["-u"], "-u") do
       monto = args["-a"]
       query_id_moneda = from(m in Moneda, where: m.nombre == ^nombre_moneda, select: m.id)
       id_moneda = Ledger.Repo.one(query_id_moneda)
-
       query_cuenta_origen =
         from(c in Cuenta,
           where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda,
           select: c
         )
-
       cuenta = Ledger.Repo.one(query_cuenta_origen)
-
       case cuenta do
         nil ->
           args = %{"-id" => "#{id_usuario}", "-m" => "#{id_moneda}"}
@@ -126,12 +118,29 @@ defmodule Ledger.Commands.Transacciones do
       {:error, mensaje} ->
         {:error, mensaje}
     end
-
-    # IO.puts("Cuenta matcheada: ")
-    # si no existe: llamamos a Cuentas.run(:alta, args) y con lo que nos devuelve, hacemos la transaccion alta_cuenta con los campos requeridos
   end
 
-  defp transferencia(:crear, _) do
+  defp transferencia(:crear, args) do
+    with {:ok, moneda_o_id} <- Utils.validate_id(args["-m"], "-m"),
+    {:ok, usuario_origen_id} <- Utils.validate_id(args["-o"], "-o"),
+    {:ok, usuario_destino_id} <- Utils.validate_id(args["-d"], "-d"),
+    {:ok, cuenta_origen} <- Cuentas.run(:ver, %{"-u"=>"#{usuario_origen_id}", "-m"=>"#{moneda_o_id}"}),
+    {:ok, cuenta_destino} <- Cuentas.run(:ver, %{"-u"=>"#{usuario_destino_id}", "-m"=>"#{moneda_o_id}"})
+    do
+      transferencia = %{
+        tipo: "transferencia",
+        monto: args["-a"],
+        cuenta_origen_id: cuenta_origen.id,
+        cuenta_destino_id: cuenta_destino.id,
+        moneda_origen_id: moneda_o_id,
+        moneda_destino_id: moneda_o_id
+      }
+      Transaccion.changeset_transferencia(%Transaccion{}, transferencia)
+      |> insertar_transaccion("transferencia")
+    else
+     {:error, mensaje} ->
+      {:error, mensaje}
+    end
   end
 
   defp transferencia(:borrar, _) do
@@ -150,4 +159,5 @@ defmodule Ledger.Commands.Transacciones do
         {:error, "#{funcion}: #{Utils.format_errors(changeset)}"}
     end
   end
+
 end

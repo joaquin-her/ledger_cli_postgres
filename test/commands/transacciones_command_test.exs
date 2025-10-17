@@ -44,7 +44,7 @@ defmodule Commands.TransaccionesCommandTest do
     {:ok, usuario} = Usuarios.run(:crear, args_usuario)
     args_moneda = %{"-n" => "BTC", "-p" => "10000"}
     {:ok, moneda} = Monedas.run(:crear, args_moneda)
-    {:ok, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
+    {:ok, _} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
 
     # act
     args = %{"-u" => "#{usuario.id}", "-m" => "#{moneda.nombre}", "-a" => "15"}
@@ -74,9 +74,9 @@ defmodule Commands.TransaccionesCommandTest do
       "-a" => "0.99"
     }
 
-    {:ok, transaccion1} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
-    {:ok, transaccion2} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
-    {:ok, transaccion3} = Transacciones.run(:crear, "swap", args_transaccion3)
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
+    {:ok, _} = Transacciones.run(:crear, "swap", args_transaccion3)
 
     query = from(t in Transaccion, where: t.tipo == ^"alta_cuenta", select: t)
     cuentas_usuario = Ledger.Repo.all(query)
@@ -91,9 +91,9 @@ defmodule Commands.TransaccionesCommandTest do
     args_moneda  = %{"-n" => "BTC", "-p" => "200"}
     {_, moneda} = Monedas.run(:crear, args_moneda)
     args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "500"}
-    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "0"}
-    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
-    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
+    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "1.05"}
+    {:ok, cuenta1} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
+    {:ok, cuenta2} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
 
     args_transacciones = %{"-o"=>"#{usuario1.id}","-d"=>"#{usuario2.id}", "-m"=>"#{moneda.id}", "-a"=>"100"}
     {:ok, t} = Transacciones.run(:crear, "transferencia", args_transacciones)
@@ -101,11 +101,11 @@ defmodule Commands.TransaccionesCommandTest do
     transaccion = Ledger.Repo.get(Transaccion, t.id)
     assert transaccion != nil
     assert transaccion.monto == Decimal.new(100)
-    assert transaccion.tipo == "transaccion"
+    assert transaccion.tipo == "transferencia"
     assert transaccion.moneda_origen_id == moneda.id
     assert transaccion.moneda_destino_id == moneda.id
-    assert transaccion.cuenta_origen_id == usuario1.id
-    assert transaccion.cuenta_destino_id == usuario2.id
+    assert transaccion.cuenta_origen_id == cuenta1.cuenta_origen_id
+    assert transaccion.cuenta_destino_id == cuenta2.cuenta_origen_id
   end
 
   # Get transacciones
