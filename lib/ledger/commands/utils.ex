@@ -15,7 +15,7 @@ defmodule Ledger.Commands.Utils do
   def validate_id(id) when is_binary(id) do
     case Integer.parse(id) do
       {num, ""} when num > 0 -> {:ok, num}
-      _ -> {:error, "ID inválido"}
+      _ -> {:error, "no puede ser negativo"}
     end
   end
 
@@ -24,7 +24,7 @@ defmodule Ledger.Commands.Utils do
   def validate_id(id, flag) do
     case validate_id(id) do
       {:ok, id} -> {:ok, id}
-      {:error, _} -> {:error, "id_invalido: #{flag}"}
+      {:error, error} -> {:error, "id_invalido: argumento=#{flag} #{error}"}
     end
   end
 end

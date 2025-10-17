@@ -63,12 +63,13 @@ TRANSACCION
 - calcula el valor en dolares del monto :monto_en_dolares
 - hace la conversion de :monto_en_dolares a :moneda_destino segun su valor en :monedas
 - 
-DOING: 
+STARTED:
 /ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
+DOING: 
+/ledger balance -u1=<id-usuario> -u2=<id-usuario> -m=<id-moneda> 
 
 PENDING:
 /ledger deshacer_transaccion -id=<id-transaccion> 
 /ledger ver_transaccion -id=<id-transaccion>
-/ledger balance -u1=<id-usuario> -u2=<id-usuario> -m=<id-moneda> 
 . transacciones entre cuentas sin monedas comun 
 . transacciones con monto insuficiente

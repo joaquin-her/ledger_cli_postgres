@@ -9,7 +9,8 @@ defmodule Ledger.Commands.Transacciones do
   def run(:ver, _) do
     {:ok, :ok}
   end
-  def run(_)do
+
+  def run(_) do
     {:ok, :ok}
   end
 
@@ -117,7 +118,9 @@ defmodule Ledger.Commands.Transacciones do
         _ ->
           transaccion = %{
             cuenta_origen_id: cuenta.id,
+            cuenta_destino_id: cuenta.id,
             moneda_origen_id: id_moneda,
+            moneda_destino_id: id_moneda,
             tipo: "alta_cuenta",
             monto: monto
           }
@@ -172,4 +175,5 @@ defmodule Ledger.Commands.Transacciones do
         {:error, "#{funcion}: #{Utils.format_errors(changeset)}"}
     end
   end
+
 end

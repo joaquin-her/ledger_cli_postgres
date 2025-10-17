@@ -28,6 +28,7 @@ defmodule Ledger.Schemas.Transaccion do
   def changese_alta_cuenta(transaccion \\ %Ledger.Schemas.Transaccion{}, attrs) do
     transaccion
     |> changeset(attrs)
+    |> Changeset.cast(attrs, [:moneda_destino_id, :cuenta_destino_id])
     # valida que la cuenta exista
     |> validate_valid_account(:cuenta_origen)
   end

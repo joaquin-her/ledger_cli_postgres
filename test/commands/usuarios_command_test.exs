@@ -150,6 +150,6 @@ defmodule Commands.UsuariosCommandTest do
     args = %{"-id" => "-1"}
     {status, mensaje} = Usuarios.run(:ver, args)
     assert status == :error
-    assert mensaje == "ver_usuario: :id no puede ser negativo"
+    assert mensaje == "ver_usuario: id_invalido: argumento=-id no puede ser negativo"
   end
 end

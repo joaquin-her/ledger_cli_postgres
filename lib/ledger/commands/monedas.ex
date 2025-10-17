@@ -98,6 +98,7 @@ defmodule Ledger.Commands.Monedas do
         end
     end
   end
+
   def run(operation, args) do
     IO.puts("Running monedas with operation: #{operation} args: \n#{inspect(args)}")
   end
@@ -122,6 +123,4 @@ defmodule Ledger.Commands.Monedas do
         {:error, "borrar_moneda: error al intentar eliminar al moneda #{inspect(e)}"}
     end
   end
-
-
 end
