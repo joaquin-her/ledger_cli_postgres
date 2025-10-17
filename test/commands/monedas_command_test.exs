@@ -56,25 +56,25 @@ defmodule TestCommandMonedas do
   test "ingresar moneda con nombre de mas de 4 letras da error " do
     args = %{"-n" => "dolar", "-p" => "1.0"}
     error = {:error, "crear_usuario: nombre: should be at most 4 character(s)"}
-    assert Monedas.run(:crear, args)  == error
+    assert Monedas.run(:crear, args) == error
   end
 
   test "ingresar moneda con nombre de menos de 3 letras da error " do
     args = %{"-n" => "US", "-p" => "1.0"}
     error = {:error, "crear_usuario: nombre: should be at least 3 character(s)"}
-    assert Monedas.run(:crear, args)  == error
+    assert Monedas.run(:crear, args) == error
   end
 
   test "ingresar moneda con precio negativo da error " do
     args = %{"-n" => "USDT", "-p" => "-1.0"}
     error = {:error, "crear_usuario: precio_en_usd: must be greater than 0"}
-    assert Monedas.run(:crear, args)  == error
+    assert Monedas.run(:crear, args) == error
   end
 
   test "ingresar moneda con precio 0 da error " do
     args = %{"-n" => "USDT", "-p" => "0.0"}
     error = {:error, "crear_usuario: precio_en_usd: must be greater than 0"}
-    assert Monedas.run(:crear, args)  == error
+    assert Monedas.run(:crear, args) == error
   end
 
   test "ingresar moneda con nombre repetido genera error" do
@@ -94,24 +94,24 @@ defmodule TestCommandMonedas do
   test "ingresar moneda con timestamp de creacion" do
     args = %{"-n" => "ETH", "-p" => "2000.0"}
     {status, moneda} = Monedas.run(:crear, args)
-    resultado = Ledger.Repo.get( Moneda, moneda.id)
+    resultado = Ledger.Repo.get(Moneda, moneda.id)
     assert status == :ok
-    assert not is_nil(resultado.inserted_at )
+    assert not is_nil(resultado.inserted_at)
   end
 
   # Modificar moneda
   test "modificar precio de moneda = :ok" do
     argumentos_creacion = %{"-n" => "ETH", "-p" => "3600.0"}
     {_, moneda} = Monedas.run(:crear, argumentos_creacion)
-    argumentos_modificacion  = %{"-id" => "#{moneda.id}", "-p" => "2000.0"}
+    argumentos_modificacion = %{"-id" => "#{moneda.id}", "-p" => "2000.0"}
     {status, moneda} = Monedas.run(:editar, argumentos_modificacion)
-    moneda_modificada = Ledger.Repo.get( Moneda, moneda.id)
+    moneda_modificada = Ledger.Repo.get(Moneda, moneda.id)
     assert status == :ok
     assert moneda_modificada.precio_en_usd == 2000.0
   end
 
   test "modificar id de moneda no existe = :error,msg" do
-    argumentos_modificacion  = %{"-id" => "999", "-p" => "3.0"}
+    argumentos_modificacion = %{"-id" => "999", "-p" => "3.0"}
     {status, error} = Monedas.run(:editar, argumentos_modificacion)
     assert status == :error
     assert error == "editar_moneda: moneda no encontrada"
@@ -120,14 +120,14 @@ defmodule TestCommandMonedas do
   test "modificar precio de moneda con valor invalido = :error" do
     argumentos_creacion = %{"-n" => "ETH", "-p" => "3600.0"}
     {_, moneda} = Monedas.run(:crear, argumentos_creacion)
-    argumentos_modificacion  = %{"-id" => "#{moneda.id}", "-p" => "invalid_value"}
+    argumentos_modificacion = %{"-id" => "#{moneda.id}", "-p" => "invalid_value"}
     {status, error} = Monedas.run(:editar, argumentos_modificacion)
     assert status == :error
     assert error == "editar_moneda: precio_en_usd: is invalid"
   end
 
   test "modificar precio de una moneda con un id invalido = :error" do
-    argumentos_modificacion  = %{"-id" => "invalid_value", "-p" => "10.0"}
+    argumentos_modificacion = %{"-id" => "invalid_value", "-p" => "10.0"}
     {status, error} = Monedas.run(:editar, argumentos_modificacion)
     assert status == :error
     assert error == "editar_moneda: id: is invalid"
@@ -139,7 +139,7 @@ defmodule TestCommandMonedas do
     {_, moneda} = Monedas.run(:crear, argumentos_creacion)
     updated_at_before = moneda.updated_at
     # modifica la moneda
-    argumentos_modificacion  = %{"-id" => "#{moneda.id}", "-p" => "2500.0"}
+    argumentos_modificacion = %{"-id" => "#{moneda.id}", "-p" => "2500.0"}
     {status, moneda} = Monedas.run(:editar, argumentos_modificacion)
     assert status == :ok
     assert updated_at_before < moneda.updated_at
@@ -196,11 +196,19 @@ defmodule TestCommandMonedas do
 
   test "no se puede borrar una moneda asociada a una transaccion en transferencias " do
     {:ok, moneda} = Monedas.run(:crear, %{"-n" => "ADA", "-p" => "1.50"})
-    {:ok, usuario} = Usuarios.run(:crear, %{"-n" => "pepe_22", "-b"=> "2001-01-11"})
-    {:ok, _} = Transacciones.run(:crear,"alta_cuenta", %{"-m"=>"#{moneda.nombre}", "-u"=> "#{usuario.id}","-a"=>"10"})
+    {:ok, usuario} = Usuarios.run(:crear, %{"-n" => "pepe_22", "-b" => "2001-01-11"})
 
-    {status, mensaje} = Monedas.run(:borrar, %{"-id"=>"#{moneda.id}"})
+    {:ok, _} =
+      Transacciones.run(:crear, "alta_cuenta", %{
+        "-m" => "#{moneda.nombre}",
+        "-u" => "#{usuario.id}",
+        "-a" => "10"
+      })
+
+    {status, mensaje} = Monedas.run(:borrar, %{"-id" => "#{moneda.id}"})
     assert status == :error
-    assert mensaje == "borrar_moneda: no se puede borrar una moneda asociada a una/varias transacciones"
+
+    assert mensaje ==
+             "borrar_moneda: no se puede borrar una moneda asociada a una/varias transacciones"
   end
 end

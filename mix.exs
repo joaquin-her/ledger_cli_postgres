@@ -11,7 +11,6 @@ defmodule Ledger.MixProject do
       escript: escripts(),
       name: "ledger",
       aliases: aliases(),
-
       test_coverage: [
         summary: [threshold: 80],
         output: ".volumes/cover"
@@ -35,7 +34,7 @@ defmodule Ledger.MixProject do
   defp deps do
     [
       # {:dep_from_hexpm, "~> 0.3.0"},
-      {:ecto_sql, "~> 3.10" },
+      {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
       {:faker, "~> 0.19.0-alpha.1", only: :test}
     ]
@@ -43,7 +42,7 @@ defmodule Ledger.MixProject do
 
   defp aliases do
     [
-     "remake-db": ["ecto.drop "," ecto.create "," ecto.migrate"]
+      "remake-db": ["ecto.drop ", " ecto.create ", " ecto.migrate"]
     ]
   end
 end

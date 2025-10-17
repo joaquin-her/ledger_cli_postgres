@@ -7,31 +7,42 @@ defmodule Ledger.CLI do
   def main(args) do
     [command | arguments] = args
     arguments = parse_args(arguments)
+
     case command do
       "balance" ->
         Commands.Balance.run(arguments)
+
       "transacciones" ->
         Commands.Transacciones.run(arguments)
+
       _ ->
         command = String.split(command, "_")
+
         case command do
           [verbo, "moneda"] ->
             Commands.Monedas.run(String.to_atom(verbo), arguments)
+
           [verbo, "usuario"] ->
             Commands.Usuarios.run(String.to_atom(verbo), arguments)
+
           [verbo, "cuenta"] ->
             Commands.Cuentas.run(String.to_atom(verbo), arguments)
+
           ["ver", "transaccion"] ->
             Commands.Transacciones.run(:ver, arguments)
+
           ["realizar", tipo] ->
             Commands.Transacciones.run(:crear, tipo, arguments)
+
           ["deshacer", tipo] ->
             Commands.Transacciones.run(:borrar, tipo, arguments)
+
           _ ->
             {:error, "ledgerCLI: Commando desconocido"}
         end
     end
   end
+
   # returns a map with the parsed arguments as key-value pairs.
   def parse_args(args) do
     args

@@ -59,7 +59,7 @@ function Lines {
     }
 
     # 3. Imprime el resultado final después de procesar todos los commits
-    Write-Host "--- Resumen de las ultimos 24 horas de codigo ---"
+    Write-Host "--- Resumen de la ultima sesion de codigo ---"
     Write-Host "Lineas aniadidas: $totalAdded"
     Write-Host "Lineas eliminadas: $totalDeleted"
     Write-Host "Total neto: $($totalAdded - $totalDeleted)"

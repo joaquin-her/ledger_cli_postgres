@@ -5,11 +5,11 @@ defmodule Ledger.Schemas.Usuario do
   alias Ledger.Schemas.Cuenta
 
   schema "usuarios" do
-    field :nombre_usuario , :string
-    field :fecha_nacimiento, :date
-    #has_many :transacciones_origen, Transaccion
-    #has_many :transacciones_destino, Transaccion
-    has_many :cuentas, Cuenta
+    field(:nombre_usuario, :string)
+    field(:fecha_nacimiento, :date)
+    # has_many :transacciones_origen, Transaccion
+    # has_many :transacciones_destino, Transaccion
+    has_many(:cuentas, Cuenta)
     timestamps(inserted_at: :created_at)
   end
 
@@ -26,7 +26,8 @@ defmodule Ledger.Schemas.Usuario do
 
   defp validar_es_mayor_de_edad(changeset) do
     fecha_nacimiento = Changeset.get_field(changeset, :fecha_nacimiento)
-    edad_minima = 18*365
+    edad_minima = 18 * 365
+
     if fecha_nacimiento && Date.diff(Date.utc_today(), fecha_nacimiento) < edad_minima do
       Changeset.add_error(changeset, :fecha_nacimiento, "Debe ser mayor de edad")
     else
@@ -37,11 +38,17 @@ defmodule Ledger.Schemas.Usuario do
   defp no_mantiene_nombre_usuario(changeset) do
     nombre_actual = changeset.data.nombre_usuario
     nombre_nuevo = Changeset.get_field(changeset, :nombre_usuario)
+
     if nombre_actual && nombre_actual == nombre_nuevo do
-      Changeset.add_error(changeset, :nombre_usuario, "El nombre de usuario debe ser diferente al actual")
+      Changeset.add_error(
+        changeset,
+        :nombre_usuario,
+        "El nombre de usuario debe ser diferente al actual"
+      )
     else
       changeset
     end
   end
 end
+
 # 20 abril 2004

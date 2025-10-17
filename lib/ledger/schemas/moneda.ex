@@ -2,15 +2,16 @@ defmodule Ledger.Schemas.Moneda do
   use Ecto.Schema
   alias Ecto.Changeset
   alias Ledger.Schemas.Transaccion
+
   schema "monedas" do
-    field :nombre, :string
-    field :precio_en_usd, :float
-    field :inserted_at, :naive_datetime
-    field :updated_at, :naive_datetime
+    field(:nombre, :string)
+    field(:precio_en_usd, :float)
+    field(:inserted_at, :naive_datetime)
+    field(:updated_at, :naive_datetime)
     # Asociaciones: una moneda puede estar en múltiples transacciones
-    has_many :transacciones_origen, Transaccion, foreign_key: :moneda_origen_id
-    has_many :transacciones_destino, Transaccion, foreign_key: :moneda_destino_id
-    has_many :cuentas, Ledger.Schemas.Cuenta, foreign_key: :moneda_id
+    has_many(:transacciones_origen, Transaccion, foreign_key: :moneda_origen_id)
+    has_many(:transacciones_destino, Transaccion, foreign_key: :moneda_destino_id)
+    has_many(:cuentas, Ledger.Schemas.Cuenta, foreign_key: :moneda_id)
   end
 
   def changeset(moneda \\ %Ledger.Schemas.Moneda{}, attrs) do
