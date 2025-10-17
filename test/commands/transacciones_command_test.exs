@@ -69,8 +69,8 @@ defmodule Commands.TransaccionesCommandTest do
 
     args_transaccion3 = %{
       "-u" => "#{usuario.id}",
-      "-mo" => "#{moned1.nombre}",
-      "-md" => "#{moned2.nombre}",
+      "-mo" => "#{moned1.id}",
+      "-md" => "#{moned2.id}",
       "-a" => "0.99"
     }
 
