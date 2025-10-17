@@ -1,10 +1,14 @@
 defmodule Ledger.Commands.Transacciones do
-  alias Ledger.Schemas.Usuario
   alias Ledger.Schemas.Moneda
   alias Ledger.Schemas.Cuenta
   alias Ledger.Schemas.Transaccion
   alias Ledger.Commands.Utils
   import Ecto.Query
+
+  @doc """
+  args:
+
+  """
   def run( :crear, tipo, args) do
     case tipo do
       "swap" ->
