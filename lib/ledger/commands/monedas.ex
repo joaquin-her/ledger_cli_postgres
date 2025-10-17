@@ -124,9 +124,16 @@ defmodule Ledger.Commands.Monedas do
     end
   end
 
+  @doc """
+  Convierte una cantidad de una moneda a otra acorde a sus valores en dolares en el instante de la conversion.
+  """
   def convertir(cantidad, id_origen, id_destino) do
     moneda_origen = Ledger.Repo.get(Moneda, id_origen)
     moneda_destino = Ledger.Repo.get(Moneda, id_destino)
+    IO.puts("origen:")
+    IO.inspect(moneda_origen)
+    IO.puts("destino:")
+    IO.inspect(moneda_destino)
     cantidad_resultante = cantidad * moneda_origen.precio_en_usd / moneda_destino.precio_en_usd
     cantidad_resultante
   end
