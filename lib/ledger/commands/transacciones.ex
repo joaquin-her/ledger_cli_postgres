@@ -42,9 +42,28 @@ defmodule Ledger.Commands.Transacciones do
   def run(_,_,_) do
     {:error, "subcommando no encontrado"}
   end
-
-  defp swap( :crear, _) do
-
+  @doc """
+  ## :Crear
+  -u: usuario_id
+  -mo: moneda_origen_id
+  -md: moneda_destino_id
+  -a: monto
+  """
+  defp swap( :crear, args) do
+    {:ok, cuenta_origen} = Cuentas.run(:ver, %{"-u" => args["-u"], "-m"=>args["-mo"]})
+    {:ok, cuenta_destino} = Cuentas.run(:ver, %{"-u" => args["-u"], "-m"=>args["-md"]})
+    swap = %{
+      tipo: "swap",
+      moneda_origen_id: args["-mo"],
+      moneda_destino_id: args["-md"],
+      cuenta_origen_id: cuenta_origen.id,
+      cuenta_destino_id: cuenta_destino.id,
+      monto: args["-a"]
+    }
+    IO.inspect(swap)
+    swap
+    |> Transaccion.changeset_swap()
+    |> insertar_transaccion("swap")
   end
   defp swap( :borrar, _) do
 
@@ -57,7 +76,6 @@ defmodule Ledger.Commands.Transacciones do
     nombre_moneda = args["-m"]
     id_usuario = args["-u"]
     monto = args["-a"]
-    IO.inspect(id_usuario)
     # si ya existe la cuenta (ya haya en Cuentas una con [:id_usuario, :id_moneda] donde :id_moneda in :monedas and :mismo_nombre):
     # agregamos solo la transaccion alta_cuenta con los campos requeridos
     # si hay match, entonces significa que existe cuenta en esa moneda
@@ -66,15 +84,12 @@ defmodule Ledger.Commands.Transacciones do
     #IO.inspect(id_moneda)
     query_cuenta_origen = from c in Cuenta, where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda, select: c
     cuenta = Ledger.Repo.one(query_cuenta_origen)
-
-    IO.inspect(cuenta)
     case cuenta do
       nil ->
       args = %{"-id"=>"#{id_usuario}" , "-m"=>"#{id_moneda}" }
       Cuentas.run(:alta, args)
       |> case do
         {:ok, _} ->
-          IO.inspect(:ok)
           alta_cuenta(:crear, %{"-m" =>"#{nombre_moneda}", "-u"=>"#{id_usuario}", "-a"=>monto})
         {:error, error} ->
           {:error, error}
@@ -88,7 +103,6 @@ defmodule Ledger.Commands.Transacciones do
         tipo: "alta_cuenta",
         monto: monto
       }
-      IO.inspect(transaccion)
       Transaccion.changese_alta_cuenta( %Transaccion{} , transaccion)
       |> insertar_transaccion( "alta_cuenta")
 

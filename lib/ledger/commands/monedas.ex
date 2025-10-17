@@ -62,7 +62,7 @@ defmodule Ledger.Commands.Monedas do
 
   # borra una moneda
   def run(:borrar, args) do
-    validate_id(args["-id"])
+    Utils.validate_id(args["-id"])
     |> case do
       {:ok, id} ->
         Ledger.Repo.get(Moneda, id)
@@ -115,13 +115,5 @@ defmodule Ledger.Commands.Monedas do
     IO.puts("Running monedas with operation: #{operation} args: \n#{inspect(args)}")
   end
 
-  defp validate_id(id) when is_integer(id) and id > 0, do: {:ok, id}
-  defp validate_id(id) when is_binary(id) do
-    case Integer.parse(id) do
-      {num, ""} when num > 0 -> {:ok, num}
-      _ -> {:error, "ID inválido"}
-    end
-  end
-  defp validate_id(_), do: {:error, "ID inválido"}
 
 end

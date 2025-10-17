@@ -32,6 +32,30 @@ defmodule Ledger.Commands.Cuentas do
         {:error, "alta_cuenta: error al intentar crear la cuenta #{inspect(e)}"}
     end
   end
+  def run(:ver, args) do
+    with {:ok, id_usuario} <- Utils.validate_id(args["-u"]),
+      {:ok, id_moneda} <- Utils.validate_id(args["-m"]),
+      {:ok, cuenta} <- get_cuenta(id_usuario, id_moneda) do
+      {:ok, cuenta}
+    else
+      {:error, mensaje} ->
+        {:error, mensaje}
+      end
+  end
+
+  defp get_cuenta(id_usuario, id_moneda) do
+    query = from c in Cuenta,
+      where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda,
+      select: c
+    IO.inspect(query)
+    case Ledger.Repo.one(query) do
+      nil ->
+        {:error, "cuenta no encontrada"}
+      buscada ->
+          IO.inspect(buscada)
+        {:ok, buscada}
+    end
+  end
 
   def get_monto(id_cuenta) do
     # validate_id(id_cuenta)

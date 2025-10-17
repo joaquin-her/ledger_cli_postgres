@@ -35,7 +35,8 @@ defmodule Ledger.Schemas.Transaccion do
   def changeset_swap(transaccion \\ %Ledger.Schemas.Transaccion{}, attrs) do
     transaccion
     |> changeset(attrs)
-    |> Changeset.validate_required([ :moneda_destino_id])
+    |> Changeset.cast(attrs, [:moneda_destino_id, :cuenta_destino_id])
+    |> Changeset.validate_required( :moneda_destino_id)
     |> validate_valid_account(:cuenta_origen)
     |> validate_valid_account(:cuenta_destino)
     |> Changeset.foreign_key_constraint(:moneda_destino)
