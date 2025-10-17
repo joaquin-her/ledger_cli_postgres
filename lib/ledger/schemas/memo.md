@@ -70,3 +70,5 @@ PENDING:
 /ledger deshacer_transaccion -id=<id-transaccion> 
 /ledger ver_transaccion -id=<id-transaccion>
 /ledger balance -u1=<id-usuario> -u2=<id-usuario> -m=<id-moneda> 
+. transacciones entre cuentas sin monedas comun 
+. transacciones con monto insuficiente
