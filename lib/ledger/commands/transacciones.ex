@@ -77,50 +77,54 @@ defmodule Ledger.Commands.Transacciones do
   end
 
   defp alta_cuenta(:crear, args) do
-    nombre_moneda = args["-m"]
-    id_usuario = args["-u"]
-    monto = args["-a"]
-    query_id_moneda = from(m in Moneda, where: m.nombre == ^nombre_moneda, select: m.id)
-    id_moneda = Ledger.Repo.one(query_id_moneda)
+    with nombre_moneda <- args["-m"],
+         {:ok, id_usuario} <- Utils.validate_id(args["-u"]) do
+      monto = args["-a"]
+      query_id_moneda = from(m in Moneda, where: m.nombre == ^nombre_moneda, select: m.id)
+      id_moneda = Ledger.Repo.one(query_id_moneda)
 
-    query_cuenta_origen =
-      from(c in Cuenta,
-        where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda,
-        select: c
-      )
+      query_cuenta_origen =
+        from(c in Cuenta,
+          where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda,
+          select: c
+        )
 
-    cuenta = Ledger.Repo.one(query_cuenta_origen)
+      cuenta = Ledger.Repo.one(query_cuenta_origen)
 
-    case cuenta do
-      nil ->
-        args = %{"-id" => "#{id_usuario}", "-m" => "#{id_moneda}"}
+      case cuenta do
+        nil ->
+          args = %{"-id" => "#{id_usuario}", "-m" => "#{id_moneda}"}
 
-        Cuentas.run(:alta, args)
-        |> case do
-          {:ok, _} ->
-            alta_cuenta(:crear, %{
-              "-m" => "#{nombre_moneda}",
-              "-u" => "#{id_usuario}",
-              "-a" => monto
-            })
+          Cuentas.run(:alta, args)
+          |> case do
+            {:ok, _} ->
+              alta_cuenta(:crear, %{
+                "-m" => "#{nombre_moneda}",
+                "-u" => "#{id_usuario}",
+                "-a" => monto
+              })
 
-          {:error, error} ->
-            {:error, error}
+            {:error, error} ->
+              {:error, error}
 
-          _ ->
-            {:error, "error"}
-        end
+            _ ->
+              {:error, "error"}
+          end
 
-      _ ->
-        transaccion = %{
-          cuenta_origen_id: cuenta.id,
-          moneda_origen_id: id_moneda,
-          tipo: "alta_cuenta",
-          monto: monto
-        }
+        _ ->
+          transaccion = %{
+            cuenta_origen_id: cuenta.id,
+            moneda_origen_id: id_moneda,
+            tipo: "alta_cuenta",
+            monto: monto
+          }
 
-        Transaccion.changese_alta_cuenta(%Transaccion{}, transaccion)
-        |> insertar_transaccion("alta_cuenta")
+          Transaccion.changese_alta_cuenta(%Transaccion{}, transaccion)
+          |> insertar_transaccion("alta_cuenta")
+      end
+    else
+      {:error, mensaje} ->
+        {:error, mensaje}
     end
 
     # IO.puts("Cuenta matcheada: ")
