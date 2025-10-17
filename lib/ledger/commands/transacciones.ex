@@ -1,4 +1,5 @@
 defmodule Ledger.Commands.Transacciones do
+  alias Ledger.Commands.Cuentas
   alias Ledger.Schemas.Moneda
   alias Ledger.Schemas.Cuenta
   alias Ledger.Schemas.Transaccion
@@ -6,6 +7,11 @@ defmodule Ledger.Commands.Transacciones do
   import Ecto.Query
 
   @doc """
+  ## Crear
+   "tipos validos: SWAP, TRANSACCION, ALTA_CUENTA"
+  "ALTA_CUENTA" =
+      nombre_moneda = args["-m"]
+      id_usuario = args["-u"]
   args:
 
   """
@@ -50,6 +56,8 @@ defmodule Ledger.Commands.Transacciones do
   defp alta_cuenta(:crear, args) do
     nombre_moneda = args["-m"]
     id_usuario = args["-u"]
+    monto = args["-a"]
+    IO.inspect(id_usuario)
     # si ya existe la cuenta (ya haya en Cuentas una con [:id_usuario, :id_moneda] donde :id_moneda in :monedas and :mismo_nombre):
     # agregamos solo la transaccion alta_cuenta con los campos requeridos
     # si hay match, entonces significa que existe cuenta en esa moneda
@@ -59,18 +67,35 @@ defmodule Ledger.Commands.Transacciones do
     query_cuenta_origen = from c in Cuenta, where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda, select: c
     cuenta = Ledger.Repo.one(query_cuenta_origen)
 
-    #IO.puts("Cuenta matcheada: ")
-    #IO.inspect(cuenta)
-    # si no existe: llamamos a Cuentas.run(:alta, args) y con lo que nos devuelve, hacemos la transaccion alta_cuenta con los campos requeridos
-    transaccion = %{
-      cuenta_origen_id: cuenta.id,
-      moneda_origen_id: id_moneda,
-      tipo: "alta_cuenta",
-      monto: args["-a"]
-    }
+    IO.inspect(cuenta)
+    case cuenta do
+      nil ->
+      args = %{"-id"=>"#{id_usuario}" , "-m"=>"#{id_moneda}" }
+      Cuentas.run(:alta, args)
+      |> case do
+        {:ok, _} ->
+          IO.inspect(:ok)
+          alta_cuenta(:crear, %{"-m" =>"#{nombre_moneda}", "-u"=>"#{id_usuario}", "-a"=>monto})
+        {:error, error} ->
+          {:error, error}
+        _ ->
+          {:error, "error"}
+      end
+      _ ->
+      transaccion = %{
+        cuenta_origen_id: cuenta.id,
+        moneda_origen_id: id_moneda,
+        tipo: "alta_cuenta",
+        monto: monto
+      }
+      IO.inspect(transaccion)
+      Transaccion.changese_alta_cuenta( %Transaccion{} , transaccion)
+      |> insertar_transaccion( "alta_cuenta")
 
-    Transaccion.changese_alta_cuenta( %Transaccion{} , transaccion)
-    |> insertar_transaccion( "alta_cuenta")
+    end
+
+    #IO.puts("Cuenta matcheada: ")
+    # si no existe: llamamos a Cuentas.run(:alta, args) y con lo que nos devuelve, hacemos la transaccion alta_cuenta con los campos requeridos
   end
 
   defp transaccion( :crear, _) do
