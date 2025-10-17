@@ -1,5 +1,7 @@
 defmodule TestCommandMonedas do
   use ExUnit.Case, async: true
+  alias Ledger.Commands.Usuarios
+  alias Ledger.Commands.Transacciones
   alias Ledger.Commands.Monedas
   alias Ledger.Schemas.Moneda
 
@@ -192,4 +194,13 @@ defmodule TestCommandMonedas do
     assert count_after == count_before - 1
   end
 
+  test "no se puede borrar una moneda asociada a una transaccion en transferencias " do
+    {:ok, moneda} = Monedas.run(:crear, %{"-n" => "ADA", "-p" => "1.50"})
+    {:ok, usuario} = Usuarios.run(:crear, %{"-n" => "pepe_22", "-b"=> "2001-01-11"})
+    {:ok, _} = Transacciones.run(:crear,"alta_cuenta", %{"-m"=>"#{moneda.nombre}", "-u"=> "#{usuario.id}","-a"=>"10"})
+
+    {status, mensaje} = Monedas.run(:borrar, %{"-id"=>"#{moneda.id}"})
+    assert status == :error
+    assert mensaje == "borrar_moneda: no se puede borrar una moneda asociada a una/varias transacciones"
+  end
 end
