@@ -1,5 +1,4 @@
 defmodule Ledger.Commands.Cuentas do
-  alias Ledger.Commands.Transacciones
   alias Ledger.Schemas.Cuenta
   alias Ledger.Commands.Utils
   import Ecto.Query
@@ -17,13 +16,20 @@ defmodule Ledger.Commands.Cuentas do
       moneda_id: id_moneda ,
       usuario_id: id_usuario
     }
-    Cuenta.changeset(%Cuenta{}, cuenta)
-    |> Ledger.Repo.insert()
-    |> case do
-      {:ok, cuenta} ->
-        {:ok, cuenta}
-      {:error, changeset} ->
-        {:error, "crear_cuenta: #{Utils.format_errors(changeset)}"}
+    try do
+      Cuenta.changeset(%Cuenta{}, cuenta)
+      |> Ledger.Repo.insert()
+      |> case  do
+        {:ok, cuenta} ->
+          {:ok, cuenta}
+        {:error, changeset} ->
+          {:error, "crear_cuenta: #{Utils.format_errors(changeset)}"}
+      end
+    rescue
+      Ecto.ConstraintError ->
+        {:error, "alta_cuenta: el usuario ya tiene una cuenta en esa moneda"}
+      e ->
+        {:error, "alta_cuenta: error al intentar crear la cuenta #{inspect(e)}"}
     end
   end
 

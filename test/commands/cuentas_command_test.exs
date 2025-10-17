@@ -43,4 +43,17 @@ defmodule Commands.CuentasCommandTest do
     assert cuenta1 != cuenta2
   end
 
+  test "no se puede crear dos cuentas de la misma moneda para un mismo usuario" do
+    args = %{"-n"=> "roberto_sapo", "-b"=> "1990-12-02" }
+    {_, usuario} = Usuarios.run(:crear, args)
+    {_, moneda} = Monedas.run(:crear, %{"-n"=>"ETH", "-p"=>"30.0"})
+
+    # alta cuenta 1
+    {status, _} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m"=> "#{moneda.id}"})
+    assert status == :ok
+    # alta cuenta 2
+    {status, mensaje} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m"=> "#{moneda.id}"})
+    assert status == :error
+    assert mensaje == "alta_cuenta: el usuario ya tiene una cuenta en esa moneda"
+  end
 end
