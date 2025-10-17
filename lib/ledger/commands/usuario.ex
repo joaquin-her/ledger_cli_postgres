@@ -76,6 +76,7 @@ defmodule Ledger.Commands.Usuarios do
     case Utils.validate_id(args["-id"], "-id") do
       {:error, mensaje} ->
         {:error, "ver_usuario: #{mensaje}"}
+
       {:ok, id} ->
         case Ledger.Repo.get(Usuario, id) do
           nil ->

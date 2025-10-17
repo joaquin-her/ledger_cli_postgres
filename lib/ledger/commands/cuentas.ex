@@ -72,8 +72,10 @@ defmodule Ledger.Commands.Cuentas do
       "transferencia" ->
         restar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
         sumar_cantidad(transaccion.cuenta_destino_id, transaccion.monto)
+
       "swap" ->
         intercambiar_cantidad(transaccion)
+
       "alta_cuenta" ->
         sumar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
     end
@@ -82,19 +84,26 @@ defmodule Ledger.Commands.Cuentas do
   def restar_cantidad(id_cuenta, monto) when monto >= 0 do
     sumar_cantidad(id_cuenta, Decimal.negate("#{monto}"))
   end
-  def restar_cantidad(_, _)do
+
+  def restar_cantidad(_, _) do
     {:error, "restar_cantidad: monto: no puede ser negativo"}
   end
+
   def intercambiar_cantidad(transaccion) do
-    cantidad_a_transferir = Decimal.to_float(transaccion.monto)
+    cantidad_a_transferir =
+      Decimal.to_float(transaccion.monto)
       |> Monedas.convertir(transaccion.moneda_origen_id, transaccion.moneda_destino_id)
-    sumar_cantidad(transaccion.cuenta_destino_id, cantidad_a_transferir )
+
+    sumar_cantidad(transaccion.cuenta_destino_id, cantidad_a_transferir)
     restar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
   end
 
   def sumar_cantidad(id, cantidad) do
-    query = from c in Cuenta,
-      where: c.id == ^id
+    query =
+      from(c in Cuenta,
+        where: c.id == ^id
+      )
+
     {count, _} = Ledger.Repo.update_all(query, inc: [cantidad: cantidad])
 
     if count == 1 do
@@ -105,5 +114,4 @@ defmodule Ledger.Commands.Cuentas do
       {:error, "Cuenta no encontrada o modificaciones no realizadas"}
     end
   end
-
 end

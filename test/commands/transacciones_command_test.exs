@@ -21,8 +21,20 @@ defmodule Commands.TransaccionesCommandTest do
     args_moneda_destino = %{"-n" => "PESO", "-p" => "0.05"}
     {_, moneda_o} = Monedas.run(:crear, args_moneda_origen)
     {_, moneda_d} = Monedas.run(:crear, args_moneda_destino)
-    {_, alta_cuenta1} = Transacciones.run(:crear,"alta_cuenta", %{"-u" => "#{usuario.id}", "-m" => "#{moneda_o.nombre}", "-a"=>"10"})
-    {_, alta_cuenta2} = Transacciones.run(:crear,"alta_cuenta", %{"-u" => "#{usuario.id}", "-m" => "#{moneda_d.nombre}", "-a"=>"0.0"})
+
+    {_, alta_cuenta1} =
+      Transacciones.run(:crear, "alta_cuenta", %{
+        "-u" => "#{usuario.id}",
+        "-m" => "#{moneda_o.nombre}",
+        "-a" => "10"
+      })
+
+    {_, alta_cuenta2} =
+      Transacciones.run(:crear, "alta_cuenta", %{
+        "-u" => "#{usuario.id}",
+        "-m" => "#{moneda_d.nombre}",
+        "-a" => "0.0"
+      })
 
     args = %{
       "-u" => "#{usuario.id}",
@@ -30,6 +42,7 @@ defmodule Commands.TransaccionesCommandTest do
       "-md" => "#{moneda_d.id}",
       "-a" => "1.5"
     }
+
     {:ok, transaccion} = Transacciones.run(:crear, "swap", args)
     cuenta_origen = Ledger.Repo.get(Cuenta, alta_cuenta1.cuenta_origen_id)
     cuenta_destino = Ledger.Repo.get(Cuenta, alta_cuenta2.cuenta_origen_id)
@@ -44,7 +57,6 @@ defmodule Commands.TransaccionesCommandTest do
     assert transaccion.cuenta_destino_id == alta_cuenta2.cuenta_origen_id
     assert Decimal.new(cuenta_origen.cantidad) == Decimal.new("#{monto_esperado_en_origen}")
     assert Decimal.new(cuenta_destino.cantidad) == Decimal.new("#{monto_esperado_en_destino}")
-
   end
 
   test "se pude hacer un alta_cuenta de un usuario para una moneda" do

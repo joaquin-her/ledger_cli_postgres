@@ -19,7 +19,7 @@ defmodule Commands.BalanceCommandTest do
     monto_esperado = Decimal.new("10.0")
     # act
     {:ok, balance} = Balance.run(%{"-u1" => "#{usuario.id}"})
-    esperado = %{balance: monto_esperado, moneda: moneda.nombre,}
+    esperado = %{balance: monto_esperado, moneda: moneda.nombre}
     assert balance == [esperado]
   end
 end
