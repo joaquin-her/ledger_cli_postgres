@@ -35,7 +35,6 @@ defmodule Ledger.Commands.Balance do
         balance: c.cantidad
       })
       |> Ledger.Repo.all()
-      |> IO.inspect()
       {:ok, balance}
   end
 

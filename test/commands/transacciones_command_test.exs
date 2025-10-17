@@ -118,9 +118,13 @@ defmodule Commands.TransaccionesCommandTest do
     {:ok, t} = Transacciones.run(:crear, "transferencia", args_transacciones)
 
     transaccion = Ledger.Repo.get(Transaccion, t.id)
-    assert transaccion != nil
+    cuenta_origen = Ledger.Repo.get(Cuenta, t.cuenta_origen_id)
+    cuenta_destino = Ledger.Repo.get(Cuenta, t.cuenta_destino_id)
     assert transaccion.monto == Decimal.new(100)
     assert transaccion.tipo == "transferencia"
+
+    assert cuenta_origen.cantidad == Decimal.new("400.0")
+    assert cuenta_destino.cantidad == Decimal.new("101.05")
     assert transaccion.moneda_origen_id == moneda.id
     assert transaccion.moneda_destino_id == moneda.id
     assert transaccion.cuenta_origen_id == cuenta1.cuenta_origen_id
