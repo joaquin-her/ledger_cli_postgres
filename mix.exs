@@ -36,7 +36,8 @@ defmodule Ledger.MixProject do
     [
       # {:dep_from_hexpm, "~> 0.3.0"},
       {:ecto_sql, "~> 3.10" },
-      {:postgrex, ">= 0.0.0"}
+      {:postgrex, ">= 0.0.0"},
+      {:faker, "~> 0.19.0-alpha.1", only: :test}
     ]
   end
 
