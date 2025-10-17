@@ -64,9 +64,9 @@ TRANSACCION
 - hace la conversion de :monto_en_dolares a :moneda_destino segun su valor en :monedas
 - 
 DOING: 
+/ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
 
 PENDING:
-/ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
 /ledger deshacer_transaccion -id=<id-transaccion> 
 /ledger ver_transaccion -id=<id-transaccion>
 /ledger balance -u1=<id-usuario> -u2=<id-usuario> -m=<id-moneda> 
