@@ -19,9 +19,22 @@ defmodule Commands.BalanceCommandTest do
     {:ok, moneda} = Monedas.run(:crear, args_moneda)
 
     args_transaccion_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "10"}
-    args_transaccion_2 = %{"-o" => "#{usuario1.id}", "-d" => "#{usuario2.id}", "-m" => "#{moneda.id}", "-a" => "10"}
+
+    args_transaccion_2 = %{
+      "-o" => "#{usuario1.id}",
+      "-d" => "#{usuario2.id}",
+      "-m" => "#{moneda.id}",
+      "-a" => "10"
+    }
+
     args_transaccion_3 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "10"}
-    args_transaccion_auxiliar = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "0"}
+
+    args_transaccion_auxiliar = %{
+      "-u" => "#{usuario2.id}",
+      "-m" => "#{moneda.nombre}",
+      "-a" => "0"
+    }
+
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_transaccion_1)
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_transaccion_auxiliar)
 
@@ -46,10 +59,28 @@ defmodule Commands.BalanceCommandTest do
     {:ok, moneda2} = Monedas.run(:crear, args_moneda2)
 
     args_transaccion_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda1.nombre}", "-a" => "10"}
-    args_transaccion_2 = %{"-o" => "#{usuario1.id}", "-d" => "#{usuario_aux.id}", "-m" => "#{moneda1.id}", "-a" => "10"}
+
+    args_transaccion_2 = %{
+      "-o" => "#{usuario1.id}",
+      "-d" => "#{usuario_aux.id}",
+      "-m" => "#{moneda1.id}",
+      "-a" => "10"
+    }
+
     args_transaccion_3 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda2.nombre}", "-a" => "10"}
-    args_swap = %{"-u"=>"#{usuario1.id}", "-mo"=>"#{moneda2.id}", "-md"=>"#{moneda1.id}", "-a"=>"2"}
-    args_transaccion_auxiliar = %{"-u" => "#{usuario_aux.id}", "-m" => "#{moneda1.nombre}", "-a" => "0"}
+
+    args_swap = %{
+      "-u" => "#{usuario1.id}",
+      "-mo" => "#{moneda2.id}",
+      "-md" => "#{moneda1.id}",
+      "-a" => "2"
+    }
+
+    args_transaccion_auxiliar = %{
+      "-u" => "#{usuario_aux.id}",
+      "-m" => "#{moneda1.nombre}",
+      "-a" => "0"
+    }
 
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_transaccion_1)
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_transaccion_auxiliar)
@@ -59,7 +90,8 @@ defmodule Commands.BalanceCommandTest do
 
     balance_esperado = [
       %{
-        balance: Decimal.new("0.0004"), # 2* 0.02 /100
+        # 2* 0.02 /100
+        balance: Decimal.new("0.0004"),
         moneda: "BTC"
       },
       %{
@@ -67,6 +99,7 @@ defmodule Commands.BalanceCommandTest do
         moneda: "GHR"
       }
     ]
+
     IO.inspect(usuario1)
     {:ok, balance} = Balance.get_balance(usuario1)
     assert balance == balance_esperado
@@ -84,10 +117,28 @@ defmodule Commands.BalanceCommandTest do
     {:ok, moneda2} = Monedas.run(:crear, args_moneda2)
 
     args_transaccion_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda1.nombre}", "-a" => "10"}
-    args_transaccion_2 = %{"-o" => "#{usuario1.id}", "-d" => "#{usuario_aux.id}", "-m" => "#{moneda1.id}", "-a" => "10"}
+
+    args_transaccion_2 = %{
+      "-o" => "#{usuario1.id}",
+      "-d" => "#{usuario_aux.id}",
+      "-m" => "#{moneda1.id}",
+      "-a" => "10"
+    }
+
     args_transaccion_3 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda2.nombre}", "-a" => "10"}
-    args_swap = %{"-u"=>"#{usuario1.id}", "-mo"=>"#{moneda2.id}", "-md"=>"#{moneda1.id}", "-a"=>"2"}
-    args_transaccion_auxiliar = %{"-u" => "#{usuario_aux.id}", "-m" => "#{moneda1.nombre}", "-a" => "0"}
+
+    args_swap = %{
+      "-u" => "#{usuario1.id}",
+      "-mo" => "#{moneda2.id}",
+      "-md" => "#{moneda1.id}",
+      "-a" => "2"
+    }
+
+    args_transaccion_auxiliar = %{
+      "-u" => "#{usuario_aux.id}",
+      "-m" => "#{moneda1.nombre}",
+      "-a" => "0"
+    }
 
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_transaccion_1)
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_transaccion_auxiliar)
@@ -97,13 +148,14 @@ defmodule Commands.BalanceCommandTest do
 
     balance_esperado = [
       %{
-        balance: Decimal.new("0.0020"), # 2* 0.02 /100 + 8* 0.02 / 100
+        # 2* 0.02 /100 + 8* 0.02 / 100
+        balance: Decimal.new("0.0020"),
         moneda: "BTC"
       }
     ]
+
     IO.inspect(usuario1)
     {:ok, balance} = Balance.get_balance(usuario1, moneda1.id)
     assert balance == balance_esperado
   end
-
 end

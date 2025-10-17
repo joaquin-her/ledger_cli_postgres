@@ -39,34 +39,45 @@ defmodule Ledger.Commands.Balance do
         balance: c.cantidad
       })
       |> Ledger.Repo.all()
+
     case id_moneda_conversion do
       nil ->
-        balance = Enum.map(balance, fn b ->%{
-            balance: b.balance,
-            moneda: b.moneda}
-        end)
+        balance =
+          Enum.map(balance, fn b ->
+            %{
+              balance: b.balance,
+              moneda: b.moneda
+            }
+          end)
+
         {:ok, balance}
+
       _ ->
         moneda = Ledger.Repo.get(Moneda, id_moneda_conversion)
-        balance = balance
-        |> convertir_balance_a_precio_id_moneda_conversion(moneda)
-        |> reduce_balances()
-        |> Map.put( :moneda , moneda.nombre)
+
+        balance =
+          balance
+          |> convertir_balance_a_precio_id_moneda_conversion(moneda)
+          |> reduce_balances()
+          |> Map.put(:moneda, moneda.nombre)
+
         {:ok, [balance]}
     end
   end
 
   def convertir_balance_a_precio_id_moneda_conversion(balances, moneda) do
     Enum.map(balances, fn b ->
-      convertido = Monedas.convertir( Decimal.to_float(b.balance), b.id, moneda.id)
+      convertido = Monedas.convertir(Decimal.to_float(b.balance), b.id, moneda.id)
       %{balance: convertido}
     end)
   end
 
   defp reduce_balances(balances_convertidos) do
-    balances_convertidos = Enum.reduce(balances_convertidos, 0, fn item, acc ->
-      Decimal.add(acc, Decimal.from_float(item.balance))
-    end)
+    balances_convertidos =
+      Enum.reduce(balances_convertidos, 0, fn item, acc ->
+        Decimal.add(acc, Decimal.from_float(item.balance))
+      end)
+
     # Devuelve el resultado en el formato esperado por el Enum.map final
     %{balance: balances_convertidos}
   end

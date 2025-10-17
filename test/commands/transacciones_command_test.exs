@@ -143,6 +143,9 @@ defmodule Commands.TransaccionesCommandTest do
     assert transaccion.cuenta_destino_id == cuenta2.cuenta_origen_id
   end
 
+  test "se puede deshacer una transaccion si es la ultima de ambos usuarios asociados" do
+  end
+
   # Get transacciones
 
   # Update transacciones

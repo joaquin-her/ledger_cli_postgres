@@ -130,10 +130,6 @@ defmodule Ledger.Commands.Monedas do
   def convertir(cantidad, id_origen, id_destino) do
     moneda_origen = Ledger.Repo.get(Moneda, id_origen)
     moneda_destino = Ledger.Repo.get(Moneda, id_destino)
-    IO.puts("origen:")
-    IO.inspect(moneda_origen)
-    IO.puts("destino:")
-    IO.inspect(moneda_destino)
     cantidad_resultante = cantidad * moneda_origen.precio_en_usd / moneda_destino.precio_en_usd
     cantidad_resultante
   end
