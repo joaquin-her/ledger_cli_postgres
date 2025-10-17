@@ -63,8 +63,10 @@ TRANSACCION
 - calcula el valor en dolares del monto :monto_en_dolares
 - hace la conversion de :monto_en_dolares a :moneda_destino segun su valor en :monedas
 - 
-STARTED:
+ALMOST DONE:
 /ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
+
+STARTED:
 /ledger balance -u1=<id-usuario> -m=<id-moneda> 
 DOING: 
 
