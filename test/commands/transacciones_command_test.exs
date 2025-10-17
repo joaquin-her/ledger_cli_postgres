@@ -3,6 +3,7 @@ defmodule Commands.TransaccionesCommandTest do
   alias Ledger.Schemas.Transaccion
   alias Ledger.Commands.Transacciones
   alias Ledger.Commands.Cuentas
+  alias Ledger.Schemas.Cuenta
   alias Ledger.Commands.Monedas
   alias Ledger.Commands.Usuarios
   import Ecto.Query
@@ -16,27 +17,34 @@ defmodule Commands.TransaccionesCommandTest do
     # Arrange
     args_usuario = %{"-n" => "pepe", "-b" => "2001-11-01"}
     {_, usuario} = Usuarios.run(:crear, args_usuario)
-    args_moneda_origen = %{"-n" => "BTC", "-p" => "10000"}
-    args_moneda_destino = %{"-n" => "PESO", "-p" => "0.008"}
+    args_moneda_origen = %{"-n" => "BTC", "-p" => "1000.0"}
+    args_moneda_destino = %{"-n" => "PESO", "-p" => "0.05"}
     {_, moneda_o} = Monedas.run(:crear, args_moneda_origen)
     {_, moneda_d} = Monedas.run(:crear, args_moneda_destino)
-    {_, cuenta1} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda_o.id}"})
-    {_, cuenta2} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda_d.id}"})
+    {_, alta_cuenta1} = Transacciones.run(:crear,"alta_cuenta", %{"-u" => "#{usuario.id}", "-m" => "#{moneda_o.nombre}", "-a"=>"10"})
+    {_, alta_cuenta2} = Transacciones.run(:crear,"alta_cuenta", %{"-u" => "#{usuario.id}", "-m" => "#{moneda_d.nombre}", "-a"=>"0.0"})
 
     args = %{
       "-u" => "#{usuario.id}",
       "-mo" => "#{moneda_o.id}",
       "-md" => "#{moneda_d.id}",
-      "-a" => "100"
+      "-a" => "1.5"
     }
-
     {:ok, transaccion} = Transacciones.run(:crear, "swap", args)
+    cuenta_origen = Ledger.Repo.get(Cuenta, alta_cuenta1.cuenta_origen_id)
+    cuenta_destino = Ledger.Repo.get(Cuenta, alta_cuenta2.cuenta_origen_id)
+
+    monto_esperado_en_origen = "8.5"
+    monto_esperado_en_destino = "30000.0"
     assert transaccion.tipo == "swap"
     assert transaccion.moneda_origen_id == moneda_o.id
     assert transaccion.moneda_destino_id == moneda_d.id
-    assert transaccion.monto == Decimal.new(100)
-    assert transaccion.cuenta_origen_id == cuenta1.id
-    assert transaccion.cuenta_destino_id == cuenta2.id
+    assert transaccion.monto == Decimal.new("1.5")
+    assert transaccion.cuenta_origen_id == alta_cuenta1.cuenta_origen_id
+    assert transaccion.cuenta_destino_id == alta_cuenta2.cuenta_origen_id
+    assert Decimal.new(cuenta_origen.cantidad) == Decimal.new("#{monto_esperado_en_origen}")
+    assert Decimal.new(cuenta_destino.cantidad) == Decimal.new("#{monto_esperado_en_destino}")
+
   end
 
   test "se pude hacer un alta_cuenta de un usuario para una moneda" do

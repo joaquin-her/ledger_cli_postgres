@@ -86,7 +86,6 @@ defmodule Ledger.Commands.Transacciones do
       monto = args["-a"]
       query_id_moneda = from(m in Moneda, where: m.nombre == ^nombre_moneda, select: m.id)
       id_moneda = Ledger.Repo.one(query_id_moneda)
-
       query_cuenta_origen =
         from(c in Cuenta,
           where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda,

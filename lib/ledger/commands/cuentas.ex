@@ -2,6 +2,8 @@ defmodule Ledger.Commands.Cuentas do
   alias Ledger.Schemas.Transaccion
   alias Ledger.Schemas.Cuenta
   alias Ledger.Commands.Utils
+  alias Ledger.Commands.Monedas
+
   import Ecto.Query
 
   @doc """
@@ -71,6 +73,7 @@ defmodule Ledger.Commands.Cuentas do
         restar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
         sumar_cantidad(transaccion.cuenta_destino_id, transaccion.monto)
       "swap" ->
+        IO.inspect("SWAP")
         intercambiar_cantidad(transaccion)
       "alta_cuenta" ->
         sumar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
@@ -84,7 +87,12 @@ defmodule Ledger.Commands.Cuentas do
     {:error, "restar_cantidad: monto: no puede ser negativo"}
   end
   def intercambiar_cantidad(transaccion) do
-    transaccion
+    IO.inspect(transaccion.monto)
+    cantidad_a_transferir = Decimal.to_float(transaccion.monto)
+      |> Monedas.convertir(transaccion.moneda_origen_id, transaccion.moneda_destino_id)
+    IO.inspect(cantidad_a_transferir, label: "cantidad_a_transferir")
+    sumar_cantidad(transaccion.cuenta_destino_id, cantidad_a_transferir )
+    restar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
   end
 
   def sumar_cantidad(id, cantidad) do
