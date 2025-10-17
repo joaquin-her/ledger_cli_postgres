@@ -65,8 +65,8 @@ TRANSACCION
 - 
 STARTED:
 /ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
+/ledger balance -u1=<id-usuario> -m=<id-moneda> 
 DOING: 
-/ledger balance -u1=<id-usuario> -u2=<id-usuario> -m=<id-moneda> 
 
 PENDING:
 /ledger deshacer_transaccion -id=<id-transaccion> 

@@ -162,10 +162,6 @@ defmodule Ledger.Commands.Transacciones do
   defp transferencia(:borrar, _) do
   end
 
-  defp transferencia(_, _) do
-    {:error, "subcommando no encontrado"}
-  end
-
   defp insertar_transaccion(transaccion, funcion) do
     case Ledger.Repo.insert(transaccion) do
       {:ok, transaccion} ->

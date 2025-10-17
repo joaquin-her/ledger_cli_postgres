@@ -3,6 +3,7 @@ defmodule Commands.CuentasCommandTest do
   alias Ledger.Commands.Monedas
   alias Ledger.Commands.Cuentas
   alias Ledger.Commands.Usuarios
+  alias Ledger.Schemas.Cuenta
   import Ecto.Query
 
   setup do
@@ -60,12 +61,30 @@ defmodule Commands.CuentasCommandTest do
     assert mensaje == "alta_cuenta: el usuario ya tiene una cuenta en esa moneda"
   end
 
-  test "se puede actualizar la cantidad de una cuenta" do
+  test "se puede incrementar la cantidad de una cuenta" do
     args = %{"-n" => "roberto_sapo", "-b" => "1990-12-02"}
     {_, usuario} = Usuarios.run(:crear, args)
     {_, moneda} = Monedas.run(:crear, %{"-n" => "ETH", "-p" => "30.0"})
     {status, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
 
     {:ok, _} = Cuentas.sumar_cantidad(cuenta.id, 10.0)
+    cuenta_actualizada = Ledger.Repo.get(Cuenta, cuenta.id)
+    assert cuenta_actualizada.cantidad == Decimal.new("10.0")
+    assert cuenta_actualizada.id == cuenta.id
+    assert cuenta_actualizada.usuario_id == usuario.id
+  end
+
+  test "se puede decrementar la cantidad de una cuenta" do
+    args = %{"-n" => "roberto_sapo", "-b" => "1990-12-02"}
+    {_, usuario} = Usuarios.run(:crear, args)
+    {_, moneda} = Monedas.run(:crear, %{"-n" => "ETH", "-p" => "30.0"})
+    {status, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
+    {:ok, _} = Cuentas.sumar_cantidad(cuenta.id, 110.0)
+
+    {:ok, _} = Cuentas.restar_cantidad(cuenta.id, 10.0)
+    cuenta_actualizada = Ledger.Repo.get(Cuenta, cuenta.id)
+    assert cuenta_actualizada.cantidad == Decimal.new("100.0")
+    assert cuenta_actualizada.id == cuenta.id
+    assert cuenta_actualizada.usuario_id == usuario.id
   end
 end

@@ -68,8 +68,8 @@ defmodule Ledger.Commands.Cuentas do
   def update(transaccion) do
     case transaccion.tipo do
       "transferencia" ->
-        sumar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
-        restar_cantidad(transaccion.cuenta_destino_id, transaccion.monto)
+        restar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
+        sumar_cantidad(transaccion.cuenta_destino_id, transaccion.monto)
       "swap" ->
         intercambiar_cantidad(transaccion)
       "alta_cuenta" ->
@@ -77,8 +77,11 @@ defmodule Ledger.Commands.Cuentas do
     end
   end
 
-  def restar_cantidad(id_cuenta, monto) do
-    {id_cuenta, monto}
+  def restar_cantidad(id_cuenta, monto) when monto >= 0 do
+    sumar_cantidad(id_cuenta, Decimal.negate("#{monto}"))
+  end
+  def restar_cantidad(_, _)do
+    {:error, "restar_cantidad: monto: no puede ser negativo"}
   end
   def intercambiar_cantidad(transaccion) do
     transaccion
