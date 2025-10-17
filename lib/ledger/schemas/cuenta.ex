@@ -6,7 +6,7 @@ defmodule Ledger.Schemas.Cuenta do
   alias Ledger.Schemas.Transaccion
 
   schema "cuentas" do
-    # field :monto, :decimal
+    field :cantidad, :decimal
     belongs_to(:usuario, Usuario)
     belongs_to(:moneda, Moneda)
     has_many(:transacciones_origen, Transaccion, foreign_key: :cuenta_origen_id)

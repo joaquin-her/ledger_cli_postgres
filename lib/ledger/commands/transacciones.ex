@@ -169,8 +169,8 @@ defmodule Ledger.Commands.Transacciones do
   defp insertar_transaccion(transaccion, funcion) do
     case Ledger.Repo.insert(transaccion) do
       {:ok, transaccion} ->
+        Cuentas.update(transaccion)
         {:ok, transaccion}
-
       {:error, changeset} ->
         {:error, "#{funcion}: #{Utils.format_errors(changeset)}"}
     end

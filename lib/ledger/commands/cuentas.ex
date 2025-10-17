@@ -64,4 +64,38 @@ defmodule Ledger.Commands.Cuentas do
         {:ok, buscada}
     end
   end
+
+  def update(transaccion) do
+    case transaccion.tipo do
+      "transferencia" ->
+        sumar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
+        restar_cantidad(transaccion.cuenta_destino_id, transaccion.monto)
+      "swap" ->
+        intercambiar_cantidad(transaccion)
+      "alta_cuenta" ->
+        sumar_cantidad(transaccion.cuenta_origen_id, transaccion.monto)
+    end
+  end
+
+  def restar_cantidad(id_cuenta, monto) do
+    {id_cuenta, monto}
+  end
+  def intercambiar_cantidad(transaccion) do
+    transaccion
+  end
+
+  def sumar_cantidad(id, cantidad) do
+    query = from c in Cuenta,
+      where: c.id == ^id
+    {count, _} = Ledger.Repo.update_all(query, inc: [cantidad: cantidad])
+
+    if count == 1 do
+      # Usar Repo.get! es seguro aquí si el update_all devolvió 1
+      cuenta = Ledger.Repo.get!(Cuenta, id)
+      {:ok, cuenta}
+    else
+      {:error, "Cuenta no encontrada o modificaciones no realizadas"}
+    end
+  end
+
 end

@@ -14,11 +14,12 @@ defmodule Commands.BalanceCommandTest do
     {:ok, usuario} = Usuarios.run(:crear, args_usuario)
     args_moneda = %{"-n" => "BTC", "-p" => "100.044"}
     {:ok, moneda} = Monedas.run(:crear, args_moneda)
-    args = %{"-u" => "#{usuario.id}", "-m" => "#{moneda.nombre}", "-a" => "15"}
+    args = %{"-u" => "#{usuario.id}", "-m" => "#{moneda.nombre}", "-a" => "10"}
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args)
-    esperado = moneda.precio_en_usd * 15
+    monto_esperado = Decimal.new("10.0")
     # act
     {:ok, balance} = Balance.run(%{"-u1" => "#{usuario.id}"})
-    assert balance == esperado
+    esperado = %{balance: monto_esperado, moneda: moneda.nombre,}
+    assert balance == [esperado]
   end
 end

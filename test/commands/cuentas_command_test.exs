@@ -20,6 +20,8 @@ defmodule Commands.CuentasCommandTest do
     assert status == :ok
     cuenta = Ledger.Repo.get(Ledger.Schemas.Cuenta, cuenta.id)
     assert cuenta != nil
+    assert cuenta.moneda_id == moneda.id
+    assert cuenta.cantidad == Decimal.new("0.0")
   end
 
   test "se pueden crear varias cuentas para un mismo usuario con monedas distintas" do
@@ -56,5 +58,14 @@ defmodule Commands.CuentasCommandTest do
     {status, mensaje} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
     assert status == :error
     assert mensaje == "alta_cuenta: el usuario ya tiene una cuenta en esa moneda"
+  end
+
+  test "se puede actualizar la cantidad de una cuenta" do
+    args = %{"-n" => "roberto_sapo", "-b" => "1990-12-02"}
+    {_, usuario} = Usuarios.run(:crear, args)
+    {_, moneda} = Monedas.run(:crear, %{"-n" => "ETH", "-p" => "30.0"})
+    {status, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
+
+    {:ok, _} = Cuentas.sumar_cantidad(cuenta.id, 10.0)
   end
 end
