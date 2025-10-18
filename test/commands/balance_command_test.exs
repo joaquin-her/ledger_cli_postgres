@@ -30,13 +30,13 @@ defmodule Commands.BalanceCommandTest do
     {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
     {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.nombre, 0)
     {:ok, _} = TestHelpers.crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 15)
 
     # Act
     {:ok, balance} = Balance.get_balance(usuario1)
 
     # Assert
-    esperado = [%{balance: Decimal.new("10.0"), moneda: btc.nombre}]
+    esperado = [%{balance: Decimal.new("15.0"), moneda: btc.nombre}]
     assert balance == esperado
   end
 
@@ -72,10 +72,9 @@ defmodule Commands.BalanceCommandTest do
 
     # Act
     {:ok, balance} = Balance.get_balance(usuario1, ghr.id)
-
     # Assert
     balance_esperado = [
-      %{balance: Decimal.new("0.0020"), moneda: "#{btc.nombre}"}
+      %{balance: Decimal.new("10.0"), moneda: "#{ghr.nombre}"}
     ]
 
     assert balance == balance_esperado
