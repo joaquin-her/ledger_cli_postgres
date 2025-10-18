@@ -30,7 +30,11 @@ defmodule Ledger.Commands.UtilsTest do
   end
 
   test "validate_id debe validar otros tipos de ingreso como invalidos" do
-    assert Utils.validate_id(:invalid) == {:error, "ID inválido"}
+    assert Utils.validate_id(:invalid) == {:error, "ID invalido"}
+  end
+
+  test "validate_id debe mostrar como necesario un valor si el ingreso es vacio" do
+    {:error, "es requerido"}
   end
 
   test "validate_id con flag debe devolver la flag y el error" do
@@ -43,6 +47,8 @@ defmodule Ledger.Commands.UtilsTest do
              {:error, "id_invalido: argumento=flag no puede ser una cadena"}
 
     assert Utils.validate_id(:invalid, :flag) ==
-             {:error, "id_invalido: argumento=flag ID inválido"}
+             {:error, "id_invalido: argumento=flag ID invalido"}
+    assert Utils.validate_id(nil, :flag) ==
+             {:error, "id_invalido: argumento=flag es requerido"}
   end
 end

@@ -26,7 +26,15 @@ defmodule Ledger.Commands.Utils do
     end
   end
 
-  def validate_id(_), do: {:error, "ID inválido"}
+  def validate_id(not_an_id) do
+    case not_an_id do
+      nil ->
+        {:error, "es requerido"}
+      _ ->
+        {:error, "ID invalido"}
+
+    end
+  end
 
   def validate_id(id, flag) do
     case validate_id(id) do

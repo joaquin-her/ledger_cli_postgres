@@ -4,9 +4,10 @@ defmodule Commands.BalanceCommandTest do
   alias Ledger.Commands.Transacciones
   alias Ledger.Commands.Monedas
   alias Ledger.Commands.Usuarios
+  alias Ledger.Repo
 
   setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ledger.Repo)
+    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
     # Crear usuarios base
     {:ok, usuario1} = crear_usuario_random()

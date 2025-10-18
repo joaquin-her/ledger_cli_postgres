@@ -73,18 +73,16 @@ defmodule Ledger.Commands.Usuarios do
 
   # lista un usuario
   def run(:ver, args) do
-    case Utils.validate_id(args["-id"], "-id") do
+    with {:ok, id} <- Utils.validate_id(args["-id"], "-id") do
+      case get_usuario(id) do
+        nil ->
+          {:error, "ver_usuario: usuario no encontrado"}
+        usuario ->
+          {:ok, usuario}
+        end
+    else
       {:error, mensaje} ->
         {:error, "ver_usuario: #{mensaje}"}
-
-      {:ok, id} ->
-        case Ledger.Repo.get(Usuario, id) do
-          nil ->
-            {:error, "ver_usuario: usuario no encontrado"}
-
-          usuario ->
-            {:ok, usuario}
-        end
     end
   end
 
@@ -94,7 +92,11 @@ defmodule Ledger.Commands.Usuarios do
       fecha_nacimiento: args["-b"]\n
     }
   """
-  def run(command, args) do
-    IO.puts("Running usuario with command: #{command} and args: \n#{inspect(args)}")
+  def run(command, _) do
+    {:error, "usuario: comando #{command}: no reconocido"}
+  end
+
+  defp get_usuario(id_usuario) do
+    Ledger.Repo.get(Usuario, id_usuario)
   end
 end

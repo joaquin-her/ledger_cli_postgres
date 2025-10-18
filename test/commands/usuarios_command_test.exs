@@ -1,7 +1,7 @@
 defmodule Commands.UsuariosCommandTest do
   use ExUnit.Case, async: true
 
-  alias Ledger.Schemas.Usuarios
+  alias Ledger.Schemas.Usuario
   alias Ledger.Commands.Usuarios
 
   setup do
@@ -96,9 +96,9 @@ defmodule Commands.UsuariosCommandTest do
     {status, usuario} = Usuarios.run(:crear, args)
     assert status == :ok
 
-    {status, usuario_eliminado} = Usuarios.run(:borrar, %{"-id" => "#{usuario.id}"})
+    {status, _} = Usuarios.run(:borrar, %{"-id" => "#{usuario.id}"})
     assert status == :ok
-    assert usuario_eliminado != nil
+    assert Ledger.Repo.get(Usuario, usuario.id) == nil
   end
 
   test "no se puede eliminar a un usuario con una cuenta y transacciones asociadas" do
