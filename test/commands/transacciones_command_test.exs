@@ -152,20 +152,67 @@ defmodule Commands.TransaccionesCommandTest do
     {_, moneda} = Monedas.run(:crear, args_moneda)
     args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "500"}
     args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "1.05"}
-    {:ok, cuenta1} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
-    {:ok, cuenta2} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
-    args_transacciones = %{"-o" => "#{usuario1.id}","-d" => "#{usuario2.id}","-m" => "#{moneda.id}","-a" => "100"}
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
+
+    args_transacciones = %{
+      "-o" => "#{usuario1.id}",
+      "-d" => "#{usuario2.id}",
+      "-m" => "#{moneda.id}",
+      "-a" => "100"
+    }
+
     {:ok, t} = Transacciones.run(:crear, "transferencia", args_transacciones)
 
     {:ok, _} = Transacciones.deshacer(t.id)
 
-    transaccion = Ledger.Repo.get(Transaccion, t.id)
     cuenta_origen = Ledger.Repo.get(Cuenta, t.cuenta_origen_id)
     cuenta_destino = Ledger.Repo.get(Cuenta, t.cuenta_destino_id)
 
     assert cuenta_origen.cantidad == Decimal.new("500.0")
     assert cuenta_destino.cantidad == Decimal.new("1.05")
+  end
 
+  test "no se puede deshacer una transaccion si no es la ultima de ambos usuarios asociados" do
+    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
+    {_, usuario1} = Usuarios.run(:crear, args)
+    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
+    {_, usuario2} = Usuarios.run(:crear, args)
+    args_moneda = %{"-n" => "BTC", "-p" => "200"}
+    {_, moneda} = Monedas.run(:crear, args_moneda)
+    args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "500"}
+    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "1.05"}
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
+
+    args_transacciones = %{
+      "-o" => "#{usuario1.id}",
+      "-d" => "#{usuario2.id}",
+      "-m" => "#{moneda.id}",
+      "-a" => "100"
+    }
+
+    {:ok, t} = Transacciones.run(:crear, "transferencia", args_transacciones)
+
+    args_transaccion_extra = %{
+      "-o" => "#{usuario1.id}",
+      "-d" => "#{usuario2.id}",
+      "-m" => "#{moneda.id}",
+      "-a" => "10"
+    }
+
+    {:ok, _} = Transacciones.run(:crear, "transferencia", args_transaccion_extra)
+    # act
+    {:error, mensaje} = Transacciones.deshacer(t.id)
+    # assert
+    cuenta_origen = Ledger.Repo.get(Cuenta, t.cuenta_origen_id)
+    cuenta_destino = Ledger.Repo.get(Cuenta, t.cuenta_destino_id)
+
+    assert mensaje ==
+             "deshacer_transaccion: No se puede deshacer la transaccion porque no es la ultima realizada por la cuenta de los usuarios"
+
+    assert cuenta_origen.cantidad == Decimal.new("390.0")
+    assert cuenta_destino.cantidad == Decimal.new("111.05")
   end
 
   # Get transacciones

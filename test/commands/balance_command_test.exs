@@ -100,7 +100,6 @@ defmodule Commands.BalanceCommandTest do
       }
     ]
 
-    IO.inspect(usuario1)
     {:ok, balance} = Balance.get_balance(usuario1)
     assert balance == balance_esperado
   end
@@ -154,7 +153,6 @@ defmodule Commands.BalanceCommandTest do
       }
     ]
 
-    IO.inspect(usuario1)
     {:ok, balance} = Balance.get_balance(usuario1, moneda1.id)
     assert balance == balance_esperado
   end

@@ -32,11 +32,9 @@ defmodule Commands.CuentasCommandTest do
     {_, moneda2} = Monedas.run(:crear, %{"-n" => "BTC", "-p" => "50.0"})
 
     # alta cuenta 1
-    {status, _} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda1.id}"})
-    assert status == :ok
+    {:ok, _} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda1.id}"})
     # alta cuenta 2
-    {status, _} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda2.id}"})
-    assert status == :ok
+    {:ok, _} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda2.id}"})
 
     # assert
     query = from(c in Ledger.Schemas.Cuenta, where: c.usuario_id == ^usuario.id, select: c)
@@ -53,8 +51,7 @@ defmodule Commands.CuentasCommandTest do
     {_, moneda} = Monedas.run(:crear, %{"-n" => "ETH", "-p" => "30.0"})
 
     # alta cuenta 1
-    {status, _} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
-    assert status == :ok
+    {:ok, _} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
     # alta cuenta 2
     {status, mensaje} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
     assert status == :error
@@ -65,7 +62,7 @@ defmodule Commands.CuentasCommandTest do
     args = %{"-n" => "roberto_sapo", "-b" => "1990-12-02"}
     {_, usuario} = Usuarios.run(:crear, args)
     {_, moneda} = Monedas.run(:crear, %{"-n" => "ETH", "-p" => "30.0"})
-    {status, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
+    {:ok, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
 
     {:ok, _} = Cuentas.sumar_cantidad(cuenta.id, 10.0)
     cuenta_actualizada = Ledger.Repo.get(Cuenta, cuenta.id)
@@ -78,7 +75,7 @@ defmodule Commands.CuentasCommandTest do
     args = %{"-n" => "roberto_sapo", "-b" => "1990-12-02"}
     {_, usuario} = Usuarios.run(:crear, args)
     {_, moneda} = Monedas.run(:crear, %{"-n" => "ETH", "-p" => "30.0"})
-    {status, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
+    {:ok, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
     {:ok, _} = Cuentas.sumar_cantidad(cuenta.id, 110.0)
 
     {:ok, _} = Cuentas.restar_cantidad(cuenta.id, 10.0)

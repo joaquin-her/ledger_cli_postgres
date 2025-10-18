@@ -1,5 +1,4 @@
 defmodule Ledger.Commands.Cuentas do
-  alias Ledger.Schemas.Transaccion
   alias Ledger.Schemas.Cuenta
   alias Ledger.Commands.Utils
   alias Ledger.Commands.Monedas
