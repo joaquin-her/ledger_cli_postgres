@@ -14,8 +14,12 @@ defmodule Ledger.Commands.Utils do
 
   def validate_id(id) when is_binary(id) do
     case Integer.parse(id) do
-      {num, ""} when num > 0 -> {:ok, num}
-      {_, ""} -> {:error, "no puede ser negativo"}
+      {num, ""} when num > 0 ->
+        {:ok, num}
+
+      {_, ""} ->
+        {:error, "no puede ser negativo"}
+
       _ ->
         {:error, "no puede ser una cadena"}
     end
