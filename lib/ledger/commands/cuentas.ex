@@ -60,7 +60,7 @@ defmodule Ledger.Commands.Cuentas do
 
     case Ledger.Repo.one(query) do
       nil ->
-        {:error, "cuenta no encontrada"}
+        {:error, "get_cuenta: cuenta no encontrada"}
 
       buscada ->
         {:ok, buscada}

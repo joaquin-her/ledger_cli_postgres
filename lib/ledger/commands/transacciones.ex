@@ -172,4 +172,46 @@ defmodule Ledger.Commands.Transacciones do
         {:error, "#{funcion}: #{Utils.format_errors(changeset)}"}
     end
   end
+
+  @doc """
+  Deshace la transaccion con el id proporcionado si es la ultima de los usuarios intervinientes agregando su inversa en la base de datos
+  """
+  def deshacer(id_transaccion) do
+    with {:ok, id} <- Utils.validate_id(id_transaccion),
+      {:ok, transaccion} <- ver_transaccion(id),
+      true <- es_la_ultima_transaccion?(transaccion, transaccion.cuenta_origen_id),
+      true <- es_la_ultima_transaccion?(transaccion, transaccion.cuenta_destino_id)
+      do
+        transaccion = %Transaccion{
+          moneda_origen_id: transaccion.moneda_origen_id,
+          cuenta_origen_id: transaccion.cuenta_destino_id,
+          cuenta_destino_id: transaccion.cuenta_origen_id,
+          monto: transaccion.monto,
+          tipo: transaccion.tipo
+        }
+        insertar_transaccion(transaccion, transaccion.tipo)
+      end
+
+  end
+  def ver_transaccion(id_transaccion) do
+    case Ledger.Repo.get(Transaccion, id_transaccion) do
+      nil ->
+        {:error, "Transaccion no encontrada"}
+      transaccion ->
+        {:ok, transaccion}
+    end
+  end
+  def es_la_ultima_transaccion?(transaction, account_id) do
+    query =
+      from t in Transaccion,
+        where: (t.cuenta_origen_id == ^account_id or t.cuenta_destino_id == ^account_id) and
+               t.inserted_at > ^transaction.inserted_at,
+        limit: 1,
+        select: t.id
+    case Ledger.Repo.one(query) do
+      nil -> true  # No hay transacciones más recientes, ¡es la última!
+      _ -> false  # Se encontró una transacción más reciente.
+    end
+  end
+
 end
