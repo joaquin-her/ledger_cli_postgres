@@ -1,6 +1,5 @@
 defmodule Ledger.Commands.Balance do
   # alias Ledger.Commands.Transacciones
-  alias Ledger.Commands.Usuarios
   alias Ledger.Commands.Monedas
   alias Ledger.Schemas.Usuario
   alias Ledger.Schemas.Cuenta

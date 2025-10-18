@@ -10,6 +10,7 @@ defmodule Ledger.Commands.Utils do
     |> Enum.join("; ")
   end
 
+  @spec validate_id(any()) :: {:error, <<_::64, _::_*8>>} | {:ok, non_neg_integer()}
   def validate_id(id) when is_integer(id) and id >= 0, do: {:ok, id}
 
   def validate_id(id) when is_binary(id) do
