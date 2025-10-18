@@ -3,10 +3,12 @@ defmodule Ledger.Commands.UtilsTest do
   alias Ledger.Commands.Utils
 
   test "format_errors should format errors correctly" do
-  changeset =
-    {%{}, %{name: :string}}  # Schema vacío con tipos
-    |> Ecto.Changeset.cast(%{}, [:name])
-    |> Ecto.Changeset.validate_required([:name])
+    # Schema vacío con tipos
+    changeset =
+      {%{}, %{name: :string}}
+      |> Ecto.Changeset.cast(%{}, [:name])
+      |> Ecto.Changeset.validate_required([:name])
+
     formatted_errors = Utils.format_errors(changeset)
     assert formatted_errors == "name: can't be blank"
   end
@@ -33,8 +35,14 @@ defmodule Ledger.Commands.UtilsTest do
 
   test "validate_id con flag debe devolver la flag y el error" do
     assert Utils.validate_id("123", :flag) == {:ok, 123}
-    assert Utils.validate_id("-456", :flag) == {:error, "id_invalido: argumento=flag no puede ser negativo"}
-    assert Utils.validate_id("abc", :flag) == {:error, "id_invalido: argumento=flag no puede ser una cadena"}
-    assert Utils.validate_id(:invalid, :flag) == {:error, "id_invalido: argumento=flag ID inválido"}
+
+    assert Utils.validate_id("-456", :flag) ==
+             {:error, "id_invalido: argumento=flag no puede ser negativo"}
+
+    assert Utils.validate_id("abc", :flag) ==
+             {:error, "id_invalido: argumento=flag no puede ser una cadena"}
+
+    assert Utils.validate_id(:invalid, :flag) ==
+             {:error, "id_invalido: argumento=flag ID inválido"}
   end
 end

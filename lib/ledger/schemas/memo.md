@@ -66,14 +66,15 @@ TRANSACCION
 
 ALMOST DONE:
 /ledger balance -u1=<id-usuario> -m=<id-moneda> 
-/ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
-STARTED:
 /ledger deshacer_transaccion -id=<id-transaccion> 
 
+STARTED:
+
 DOING: 
+/ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
+. transacciones entre cuentas sin monedas comun 
 
 PENDING:
 /ledger ver_transaccion -id=<id-transaccion>
-. transacciones entre cuentas sin monedas comun 
 . transacciones con monto insuficiente
 . remover async true para evitar deadlocks en los tests o refactorizar tests para usar faker

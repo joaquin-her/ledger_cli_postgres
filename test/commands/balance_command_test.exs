@@ -23,6 +23,7 @@ defmodule Commands.BalanceCommandTest do
       ghr: ghr
     }
   end
+
   # Helpers
   defp crear_usuario_random do
     args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
@@ -54,6 +55,7 @@ defmodule Commands.BalanceCommandTest do
       "-a" => "#{monto}"
     })
   end
+
   # Tests
   test "se puede calcular el balance de un alta cuenta con varias transacciones en una misma moneda",
        %{usuario1: usuario1, usuario2: usuario2, btc: btc} do
@@ -88,6 +90,7 @@ defmodule Commands.BalanceCommandTest do
       %{balance: Decimal.new("0.0004"), moneda: "GTF"},
       %{balance: Decimal.new("8.0"), moneda: "GHR"}
     ]
+
     assert balance == balance_esperado
   end
 
@@ -107,6 +110,7 @@ defmodule Commands.BalanceCommandTest do
     balance_esperado = [
       %{balance: Decimal.new("0.0020"), moneda: "GTF"}
     ]
+
     assert balance == balance_esperado
   end
 end

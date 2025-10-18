@@ -109,8 +109,7 @@ defmodule Ledger.Commands.Monedas do
       end
     rescue
       Ecto.ConstraintError ->
-        {:error,
-         "no se puede borrar una moneda asociada a una/varias transacciones"}
+        {:error, "no se puede borrar una moneda asociada a una/varias transacciones"}
 
       e ->
         {:error, "error al intentar eliminar al moneda #{inspect(e)}"}

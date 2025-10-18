@@ -14,6 +14,7 @@ defmodule Ledger.Commands.Balance do
   def get_balance(usuario, id_moneda_conversion \\ nil) do
     # obtener de :transacciones todas las operaciones con la cuenta de id: :id_cuenta y devolver el total
     balance = get_balances_totales(usuario)
+
     case id_moneda_conversion do
       nil ->
         balance =
@@ -50,7 +51,6 @@ defmodule Ledger.Commands.Balance do
       balance: c.cantidad
     })
     |> Ledger.Repo.all()
-
   end
 
   def convertir_balance_a_precio_id_moneda_conversion(balances, moneda) do

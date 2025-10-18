@@ -26,17 +26,19 @@ defmodule LedgerTest do
     Ledger.Repo.insert!(%Moneda{id: 4, nombre: "PESO", precio_en_usd: 0.005})
 
     # Insertar usuarios
-    usuario1 = Ledger.Repo.insert!(%Ledger.Schemas.Usuario{
-      id: 1,
-      nombre_usuario: "joaquin",
-      fecha_nacimiento: ~D[2001-11-01]
-    })
+    usuario1 =
+      Ledger.Repo.insert!(%Ledger.Schemas.Usuario{
+        id: 1,
+        nombre_usuario: "joaquin",
+        fecha_nacimiento: ~D[2001-11-01]
+      })
 
-    usuario2 = Ledger.Repo.insert!(%Ledger.Schemas.Usuario{
-      id: 2,
-      nombre_usuario: "francisco",
-      fecha_nacimiento: ~D[1999-05-01]
-    })
+    usuario2 =
+      Ledger.Repo.insert!(%Ledger.Schemas.Usuario{
+        id: 2,
+        nombre_usuario: "francisco",
+        fecha_nacimiento: ~D[1999-05-01]
+      })
 
     # Crear cuentas para los usuarios
     {:ok, dolares_usuario_1} =
@@ -52,7 +54,8 @@ defmodule LedgerTest do
     {:ok, transferencia_dolares} =
       Transacciones.run(:crear, "transferencia", %{"-o" => 1, "-d" => 2, "-m" => 1, "-a" => 100})
 
-    {:ok, swap_usuario1} = Transacciones.run(:crear, "swap", %{"-u" => 1, "-mo" => 1, "-md" => 2, "-a" => 50})
+    {:ok, swap_usuario1} =
+      Transacciones.run(:crear, "swap", %{"-u" => 1, "-mo" => 1, "-md" => 2, "-a" => 50})
 
     %{
       usuario1: usuario1,
@@ -61,7 +64,7 @@ defmodule LedgerTest do
       swap_usuario1: swap_usuario1,
       dolares_usuario_1: dolares_usuario_1,
       dolares_usuario_2: dolares_usuario_2,
-      vhs_usuario_2: vhs_usuario_2,
+      vhs_usuario_2: vhs_usuario_2
     }
   end
 
@@ -78,9 +81,12 @@ defmodule LedgerTest do
   end
 
   test "un usuario existente se puede ver",
-   %{usuario1: usuario1}  do
+       %{usuario1: usuario1} do
     input = ["ver_usuario", "-id=#{usuario1.id}"]
-    esperado = "usuario: id: #{usuario1.id}, nombre: #{usuario1.nombre_usuario}, birthdate: #{usuario1.fecha_nacimiento}\n"
+
+    esperado =
+      "usuario: id: #{usuario1.id}, nombre: #{usuario1.nombre_usuario}, birthdate: #{usuario1.fecha_nacimiento}\n"
+
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
 
@@ -89,5 +95,4 @@ defmodule LedgerTest do
     esperado = "error: ver_usuario: id_invalido: argumento=-id no puede ser negativo\n"
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
-
 end

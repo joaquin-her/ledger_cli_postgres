@@ -10,7 +10,7 @@ defmodule Ledger.CLI do
 
     case command do
       "balance" ->
-        Commands.Balance.run(arguments)
+        Commands.Balance.get_balance(arguments)
 
       "transacciones" ->
         Commands.Transacciones.run(arguments)
