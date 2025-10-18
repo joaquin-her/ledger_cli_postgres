@@ -152,4 +152,13 @@ defmodule Commands.UsuariosCommandTest do
     assert status == :error
     assert mensaje == "ver_usuario: id_invalido: argumento=-id no puede ser negativo"
   end
+
+
+  test "el id de utilizado es invalido si no es un numero cuando se intenta ver" do
+    args = %{"-id" => "una_cadena"}
+    {status, mensaje} = Usuarios.run(:ver, args)
+    assert status == :error
+    assert mensaje == "ver_usuario: id_invalido: argumento=-id no puede ser una cadena"
+  end
+
 end
