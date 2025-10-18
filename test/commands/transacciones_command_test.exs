@@ -30,7 +30,13 @@ defmodule Commands.TransaccionesCommandTest do
 
   # Create transacciones
   test "se puede hacer una transaccion de tipo swap cuando un usuario tiene dos cuentas en esas monedas",
-  %{usuario1: usuario, moneda1: moneda1, moneda2: moneda2, alta_cuenta1: alta_cuenta1, alta_cuenta2: alta_cuenta2} do
+       %{
+         usuario1: usuario,
+         moneda1: moneda1,
+         moneda2: moneda2,
+         alta_cuenta1: alta_cuenta1,
+         alta_cuenta2: alta_cuenta2
+       } do
     args = %{
       "-u" => "#{usuario.id}",
       "-mo" => "#{moneda1.id}",
@@ -77,7 +83,7 @@ defmodule Commands.TransaccionesCommandTest do
   end
 
   test "se puede hacer un alta_cuenta en distintas monedas para un usuario",
-    %{usuario1: usuario} do
+       %{usuario1: usuario} do
     # usuario1 ya tiene 2 cuentas
 
     args_moneda1 = %{"-n" => "PAN", "-p" => "200"}
@@ -105,7 +111,6 @@ defmodule Commands.TransaccionesCommandTest do
   end
 
   test "se puede realizar una transaccion entre dos usuarios" do
-
     {_, usuario1} = TestHelpers.crear_usuario_unico()
     {_, usuario2} = TestHelpers.crear_usuario_unico()
     {_, moneda} = TestHelpers.crear_moneda_unica(500)
@@ -138,7 +143,7 @@ defmodule Commands.TransaccionesCommandTest do
   end
 
   test "se puede deshacer una transaccion si es la ultima de ambos usuarios asociados",
-    %{usuario1: usuario, moneda1: moneda1} do
+       %{usuario1: usuario, moneda1: moneda1} do
     args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
     {_, usuario2} = Usuarios.run(:crear, args)
 
@@ -154,6 +159,7 @@ defmodule Commands.TransaccionesCommandTest do
       "-m" => "#{moneda1.id}",
       "-a" => "10"
     }
+
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_alta_cuenta)
     # usuario1: 10 * moneda1 , 0* moneda2
     # usuario2: 100 * moneda1
@@ -167,7 +173,7 @@ defmodule Commands.TransaccionesCommandTest do
     assert cuenta_origen.cantidad == Decimal.new("0.0")
     assert cuenta_destino.cantidad == Decimal.new("110.0")
 
-    #act
+    # act
     {:ok, _} = Transacciones.deshacer(t.id)
 
     cuenta_origen = Ledger.Repo.get(Cuenta, t.cuenta_origen_id)
@@ -219,9 +225,26 @@ defmodule Commands.TransaccionesCommandTest do
     assert cuenta_destino.cantidad == Decimal.new("111.05")
   end
 
-  test "no se puede realizar una transaccion entre dos usuarios si el origen no tiene " do
+  test "no se puede realizar una transaccion en una moneda si uno de los dos usuarios no tiene una cuenta en esa moneda",
+  %{usuario1: usuario1, moneda1: moneda1, moneda2: moneda2} do
+    # arrange
+    # usuario1 ya tiene cuentas en moneda1 y moneda2.
+    {:ok, usuario2} = Ledger.TestHelpers.crear_usuario_unico()
+    Ledger.TestHelpers.crear_alta_cuenta(usuario2.id, moneda1.nombre, "0.0")
+    # usuario2 solo tiene cuenta en moneda1
+    args_transaccion_no_posible = %{
+      "-o" => "#{usuario1.id}",
+      "-d" => "#{usuario2.id}",
+      "-m" => "#{moneda2.id}",
+      "-a" => "10"
+    }
 
+    {:error, mensaje} = Transacciones.run(:crear, "transferencia", args_transaccion_no_posible)
+
+    assert mensaje ==
+             "realizar_transferencia: get_cuenta: cuenta de usuario #{usuario2.id} no encontrada para moneda id #{moneda2.id}"
   end
+
   # Get transacciones
 
   # Update transacciones

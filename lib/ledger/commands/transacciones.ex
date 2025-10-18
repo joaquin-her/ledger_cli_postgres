@@ -120,9 +120,9 @@ defmodule Ledger.Commands.Transacciones do
          {:ok, usuario_origen_id} <- Utils.validate_id(args["-o"], "-o"),
          {:ok, usuario_destino_id} <- Utils.validate_id(args["-d"], "-d"),
          {:ok, cuenta_origen} <-
-           Cuentas.run(:ver, %{"-u" => "#{usuario_origen_id}", "-m" => "#{moneda_o_id}"}),
+           Cuentas.get_cuenta(usuario_origen_id, moneda_o_id),
          {:ok, cuenta_destino} <-
-           Cuentas.run(:ver, %{"-u" => "#{usuario_destino_id}", "-m" => "#{moneda_o_id}"}) do
+           Cuentas.get_cuenta(usuario_destino_id, moneda_o_id) do
       transferencia = %{
         tipo: "transferencia",
         monto: args["-a"],

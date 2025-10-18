@@ -64,19 +64,20 @@ defmodule Ledger.Commands.Cuentas do
 
   def get_cuenta(id_usuario, id_moneda) do
     with {:ok, id_usuario_valido} <- Utils.validate_id(id_usuario),
-      {:ok, id_moneda_valido} <- Utils.validate_id(id_moneda) do
-        from(c in Cuenta,
-          where: c.usuario_id == ^id_usuario_valido and c.moneda_id == ^id_moneda_valido,
-          select: c
-        )
-        |> Ledger.Repo.one()
-        |> case do
-          nil ->
-            {:error,
-              "get_cuenta: cuenta de usuario #{id_usuario} no encontrada para moneda id #{id_moneda}"}
-          buscada ->
-            {:ok, buscada}
-        end
+         {:ok, id_moneda_valido} <- Utils.validate_id(id_moneda) do
+      from(c in Cuenta,
+        where: c.usuario_id == ^id_usuario_valido and c.moneda_id == ^id_moneda_valido,
+        select: c
+      )
+      |> Ledger.Repo.one()
+      |> case do
+        nil ->
+          {:error,
+           "get_cuenta: cuenta de usuario #{id_usuario} no encontrada para moneda id #{id_moneda}"}
+
+        buscada ->
+          {:ok, buscada}
+      end
     else
       {:error, mensaje} ->
         {:error, mensaje}
@@ -85,15 +86,14 @@ defmodule Ledger.Commands.Cuentas do
 
   def exists?(id_usuario, id_moneda) do
     with {:ok, _} <- Utils.validate_id(id_usuario),
-      {:ok, _} <- Utils.validate_id(id_moneda) do
-        case get_cuenta(id_usuario, id_moneda) do
-          {:ok, _} -> true
-          {:error, _} -> false
-        end
+         {:ok, _} <- Utils.validate_id(id_moneda) do
+      case get_cuenta(id_usuario, id_moneda) do
+        {:ok, _} -> true
+        {:error, _} -> false
+      end
     else
       {:error, _} -> false
-      end
-
+    end
   end
 
   def update(transaccion) do

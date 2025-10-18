@@ -3,6 +3,7 @@ defmodule Ledger.TestHelpers do
 
   def crear_usuario_unico(suffix \\ nil) do
     suffix = suffix || System.unique_integer([:positive])
+
     Usuarios.run(:crear, %{
       "-n" => "#{Faker.Pokemon.En.name()}_#{suffix}",
       "-b" => Faker.Date.date_of_birth()
@@ -11,6 +12,7 @@ defmodule Ledger.TestHelpers do
 
   def crear_moneda_unica(precio) do
     nombre = String.slice(Faker.Pokemon.En.name(), 0, 4)
+
     Monedas.run(:crear, %{
       "-n" => "#{nombre}",
       "-p" => precio
