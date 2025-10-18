@@ -9,37 +9,12 @@ defmodule Ledger.Commands.Balance do
 
   import Ecto.Query
 
-  def run(args) do
-    parsed = %{
-      usuario_origen: args["-u1"]
-    }
-
-    with {:ok, usuario} <- Usuarios.run(:ver, %{"-id" => parsed.usuario_origen}),
-         {:ok, balance} <- get_balance(usuario) do
-      {:ok, balance}
-    else
-      {:error, mensaje} ->
-        {:error, mensaje}
-    end
-  end
-
   @doc """
   Devuelve el monto de todas las cuentas de un usuario segun las transferencias que tenga asociada en Transacciones
   """
   def get_balance(usuario, id_moneda_conversion \\ nil) do
     # obtener de :transacciones todas las operaciones con la cuenta de id: :id_cuenta y devolver el total
-    balance =
-      Cuenta
-      |> join(:inner, [c], u in Usuario, on: c.usuario_id == u.id)
-      |> where([c, u], u.id == ^usuario.id)
-      |> join(:inner, [c, u], m in Moneda, on: c.moneda_id == m.id)
-      |> select([c, u, m], %{
-        id: m.id,
-        moneda: m.nombre,
-        balance: c.cantidad
-      })
-      |> Ledger.Repo.all()
-
+    balance = get_balances_totales(usuario)
     case id_moneda_conversion do
       nil ->
         balance =
@@ -63,6 +38,20 @@ defmodule Ledger.Commands.Balance do
 
         {:ok, [balance]}
     end
+  end
+
+  defp get_balances_totales(usuario) do
+    Cuenta
+    |> join(:inner, [c], u in Usuario, on: c.usuario_id == u.id)
+    |> where([c, u], u.id == ^usuario.id)
+    |> join(:inner, [c, u], m in Moneda, on: c.moneda_id == m.id)
+    |> select([c, u, m], %{
+      id: m.id,
+      moneda: m.nombre,
+      balance: c.cantidad
+    })
+    |> Ledger.Repo.all()
+
   end
 
   def convertir_balance_a_precio_id_moneda_conversion(balances, moneda) do
