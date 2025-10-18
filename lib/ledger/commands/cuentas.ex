@@ -114,10 +114,6 @@ defmodule Ledger.Commands.Cuentas do
     sumar_cantidad(id_cuenta, Decimal.negate("#{monto}"))
   end
 
-  def restar_cantidad(_, _) do
-    {:error, "restar_cantidad: monto: no puede ser negativo"}
-  end
-
   def intercambiar_cantidad(transaccion) do
     cantidad_a_transferir =
       Decimal.to_float(transaccion.monto)

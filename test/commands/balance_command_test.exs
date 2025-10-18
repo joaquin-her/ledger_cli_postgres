@@ -1,21 +1,19 @@
 defmodule Commands.BalanceCommandTest do
   use ExUnit.Case, async: true
   alias Ledger.Commands.Balance
-  alias Ledger.Commands.Transacciones
-  alias Ledger.Commands.Monedas
-  alias Ledger.Commands.Usuarios
   alias Ledger.Repo
+  alias Ledger.TestHelpers
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
 
     # Crear usuarios base
-    {:ok, usuario1} = crear_usuario_random()
-    {:ok, usuario2} = crear_usuario_random()
+    {:ok, usuario1} = TestHelpers.crear_usuario_unico()
+    {:ok, usuario2} = TestHelpers.crear_usuario_unico()
 
     # Crear monedas base
-    {:ok, btc} = Monedas.run(:crear, %{"-n" => "GTF", "-p" => "100"})
-    {:ok, ghr} = Monedas.run(:crear, %{"-n" => "GHR", "-p" => "0.02"})
+    {:ok, btc} = TestHelpers.crear_moneda_unica(100)
+    {:ok, ghr} = TestHelpers.crear_moneda_unica(0.02)
 
     %{
       usuario1: usuario1,
@@ -25,46 +23,14 @@ defmodule Commands.BalanceCommandTest do
     }
   end
 
-  # Helpers
-  defp crear_usuario_random do
-    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
-    Usuarios.run(:crear, args)
-  end
-
-  defp crear_alta_cuenta(usuario_id, moneda_nombre, monto) do
-    Transacciones.run(:crear, "alta_cuenta", %{
-      "-u" => "#{usuario_id}",
-      "-m" => "#{moneda_nombre}",
-      "-a" => "#{monto}"
-    })
-  end
-
-  defp crear_transferencia(origen_id, destino_id, moneda_id, monto) do
-    Transacciones.run(:crear, "transferencia", %{
-      "-o" => "#{origen_id}",
-      "-d" => "#{destino_id}",
-      "-m" => "#{moneda_id}",
-      "-a" => "#{monto}"
-    })
-  end
-
-  defp crear_swap(usuario_id, moneda_origen_id, moneda_destino_id, monto) do
-    Transacciones.run(:crear, "swap", %{
-      "-u" => "#{usuario_id}",
-      "-mo" => "#{moneda_origen_id}",
-      "-md" => "#{moneda_destino_id}",
-      "-a" => "#{monto}"
-    })
-  end
-
   # Tests
   test "se puede calcular el balance de un alta cuenta con varias transacciones en una misma moneda",
        %{usuario1: usuario1, usuario2: usuario2, btc: btc} do
     # Arrange
-    {:ok, _} = crear_alta_cuenta(usuario1.id, btc.nombre, 10)
-    {:ok, _} = crear_alta_cuenta(usuario2.id, btc.nombre, 0)
-    {:ok, _} = crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
-    {:ok, _} = crear_alta_cuenta(usuario1.id, btc.nombre, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.nombre, 0)
+    {:ok, _} = TestHelpers.crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
 
     # Act
     {:ok, balance} = Balance.get_balance(usuario1)
@@ -77,19 +43,19 @@ defmodule Commands.BalanceCommandTest do
   test "se pueden obtener el balance de varias cuentas de un usuario para monedas distintas",
        %{usuario1: usuario1, usuario2: usuario2, btc: btc, ghr: ghr} do
     # Arrange
-    {:ok, _} = crear_alta_cuenta(usuario1.id, btc.nombre, 10)
-    {:ok, _} = crear_alta_cuenta(usuario2.id, btc.nombre, 0)
-    {:ok, _} = crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
-    {:ok, _} = crear_alta_cuenta(usuario1.id, ghr.nombre, 10)
-    {:ok, _} = crear_swap(usuario1.id, ghr.id, btc.id, 2)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.nombre, 0)
+    {:ok, _} = TestHelpers.crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, ghr.nombre, 10)
+    {:ok, _} = TestHelpers.crear_swap(usuario1.id, ghr.id, btc.id, 2)
 
     # Act
     {:ok, balance} = Balance.get_balance(usuario1)
 
     # Assert
     balance_esperado = [
-      %{balance: Decimal.new("0.0004"), moneda: "GTF"},
-      %{balance: Decimal.new("8.0"), moneda: "GHR"}
+      %{balance: Decimal.new("0.0004"), moneda: "#{btc.nombre}"},
+      %{balance: Decimal.new("8.0"), moneda: "#{ghr.nombre}"}
     ]
 
     assert balance == balance_esperado
@@ -98,18 +64,18 @@ defmodule Commands.BalanceCommandTest do
   test "se puede obtener el valor de un balance en una moneda determinada",
        %{usuario1: usuario1, usuario2: usuario2, btc: btc, ghr: ghr} do
     # Arrange
-    {:ok, _} = crear_alta_cuenta(usuario1.id, btc.nombre, 10)
-    {:ok, _} = crear_alta_cuenta(usuario2.id, btc.nombre, 0)
-    {:ok, _} = crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
-    {:ok, _} = crear_alta_cuenta(usuario1.id, ghr.nombre, 10)
-    {:ok, _} = crear_swap(usuario1.id, ghr.id, btc.id, 2)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.nombre, 0)
+    {:ok, _} = TestHelpers.crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, ghr.nombre, 10)
+    {:ok, _} = TestHelpers.crear_swap(usuario1.id, ghr.id, btc.id, 2)
 
     # Act
-    {:ok, balance} = Balance.get_balance(usuario1, btc.id)
+    {:ok, balance} = Balance.get_balance(usuario1, ghr.id)
 
     # Assert
     balance_esperado = [
-      %{balance: Decimal.new("0.0020"), moneda: "GTF"}
+      %{balance: Decimal.new("0.0020"), moneda: "#{btc.nombre}"}
     ]
 
     assert balance == balance_esperado

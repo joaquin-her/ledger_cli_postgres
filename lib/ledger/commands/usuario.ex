@@ -19,8 +19,6 @@ defmodule Ledger.Commands.Usuarios do
     end
   end
 
-
-
   def run(:editar, args) do
     with {:ok, id} <- Utils.validate_id(args["-id"], "-id") do
       editar_usuario(id, args["-n"])
