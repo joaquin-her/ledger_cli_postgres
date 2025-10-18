@@ -65,20 +65,13 @@ defmodule Ledger.Commands.Monedas do
 
   # borra una moneda
   def run(:borrar, args) do
-    Utils.validate_id(args["-id"])
-    |> case do
-      {:ok, id} ->
-        Ledger.Repo.get(Moneda, id)
-        |> case do
-          nil ->
-            {:error, "borrar_moneda: Moneda no encontrada con el ID proporcionado"}
-
-          moneda_a_eliminar ->
-            eliminar_moneda(moneda_a_eliminar)
-        end
-
+    with {:ok, id} <- Utils.validate_id(args["-id"]),
+         {:ok, moneda} <- obtener_moneda(id),
+         {:ok, moneda} <- eliminar_moneda(moneda) do
+      {:ok, moneda}
+    else
       {:error, mensaje} ->
-        {:error, mensaje}
+        {:error, "borrar_moneda: #{mensaje}"}
     end
   end
 
@@ -99,8 +92,8 @@ defmodule Ledger.Commands.Monedas do
     end
   end
 
-  def run(operation, args) do
-    IO.puts("Running monedas with operation: #{operation} args: \n#{inspect(args)}")
+  def run(operacion, _) do
+    {:error, "monedas: #{operacion}: se desconoce como comando valido"}
   end
 
   defp eliminar_moneda(moneda) do
@@ -112,15 +105,25 @@ defmodule Ledger.Commands.Monedas do
           {:ok, moneda_eliminada}
 
         {:error, changeset} ->
-          {:error, "borrar_moneda: #{Utils.format_errors(changeset)}"}
+          {:error, "#{Utils.format_errors(changeset)}"}
       end
     rescue
       Ecto.ConstraintError ->
         {:error,
-         "borrar_moneda: no se puede borrar una moneda asociada a una/varias transacciones"}
+         "no se puede borrar una moneda asociada a una/varias transacciones"}
 
       e ->
-        {:error, "borrar_moneda: error al intentar eliminar al moneda #{inspect(e)}"}
+        {:error, "error al intentar eliminar al moneda #{inspect(e)}"}
+    end
+  end
+
+  defp obtener_moneda(id) do
+    case Ledger.Repo.get(Moneda, id) do
+      nil ->
+        {:error, "Moneda no encontrada con el ID proporcionado"}
+
+      moneda ->
+        {:ok, moneda}
     end
   end
 

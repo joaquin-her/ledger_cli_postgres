@@ -24,7 +24,7 @@ defmodule Ledger.CLI do
 
           [verbo, "usuario"] ->
             case Commands.Usuarios.run(String.to_atom(verbo), arguments) do
-              {:ok, usuario} -> handle_usuario(usuario)
+              {:ok, usuario} -> handle_usuario(verbo, usuario)
               {:error, error} -> IO.puts("error: #{error}")
             end
 
@@ -46,8 +46,18 @@ defmodule Ledger.CLI do
     end
   end
 
-  defp handle_usuario(usuario) do
-    IO.puts("usuario creado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
+  defp handle_usuario(verbo, usuario) do
+    case verbo do
+      "ver" ->
+        IO.puts(
+          "usuario: id: #{usuario.id}, nombre: #{usuario.nombre_usuario}, birthdate: #{usuario.fecha_nacimiento}"
+        )
+
+      "crear" ->
+        IO.puts(
+          "usuario creado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}"
+        )
+    end
   end
 
   # returns a map with the parsed arguments as key-value pairs.

@@ -69,4 +69,9 @@ defmodule LedgerTest do
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
 
+  test "un usuario existente se puede ver" do
+    input = ["ver_usuario", "-id=1"]
+    esperado = "usuario: id: 1, nombre: joaquin, birthdate: 2001-11-01\n"
+    assert capture_io(fn -> CLI.main(input) end) =~ esperado
+  end
 end

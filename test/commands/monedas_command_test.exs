@@ -211,4 +211,11 @@ defmodule TestCommandMonedas do
     assert mensaje ==
              "borrar_moneda: no se puede borrar una moneda asociada a una/varias transacciones"
   end
+
+  test "un comando desconocido devuelve un mensaje de error" do
+    {:error, mensaje} = Monedas.run(:incrementar, %{"-n" => "ADA", "-p" => "1.50"})
+
+    esperado = "monedas: incrementar: se desconoce como comando valido"
+    assert esperado == mensaje
+  end
 end
