@@ -13,7 +13,7 @@ defmodule Commands.BalanceCommandTest do
     {:ok, usuario2} = crear_usuario_random()
 
     # Crear monedas base
-    {:ok, btc} = Monedas.run(:crear, %{"-n" => "BTC", "-p" => "100"})
+    {:ok, btc} = Monedas.run(:crear, %{"-n" => "GTF", "-p" => "100"})
     {:ok, ghr} = Monedas.run(:crear, %{"-n" => "GHR", "-p" => "0.02"})
 
     %{
@@ -85,7 +85,7 @@ defmodule Commands.BalanceCommandTest do
 
     # Assert
     balance_esperado = [
-      %{balance: Decimal.new("0.0004"), moneda: "BTC"},
+      %{balance: Decimal.new("0.0004"), moneda: "GTF"},
       %{balance: Decimal.new("8.0"), moneda: "GHR"}
     ]
     assert balance == balance_esperado
@@ -105,7 +105,7 @@ defmodule Commands.BalanceCommandTest do
 
     # Assert
     balance_esperado = [
-      %{balance: Decimal.new("0.0020"), moneda: "BTC"}
+      %{balance: Decimal.new("0.0020"), moneda: "GTF"}
     ]
     assert balance == balance_esperado
   end

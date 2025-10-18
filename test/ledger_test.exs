@@ -21,40 +21,48 @@ defmodule LedgerTest do
 
     # Insertar monedas
     Ledger.Repo.insert!(%Moneda{id: 1, nombre: "USDT", precio_en_usd: 1.0})
-    Ledger.Repo.insert!(%Moneda{id: 2, nombre: "BTC", precio_en_usd: 3500.0})
-    Ledger.Repo.insert!(%Moneda{id: 3, nombre: "ETH", precio_en_usd: 1500.0})
+    Ledger.Repo.insert!(%Moneda{id: 2, nombre: "VHS", precio_en_usd: 3500.0})
+    Ledger.Repo.insert!(%Moneda{id: 3, nombre: "JOA", precio_en_usd: 1500.0})
     Ledger.Repo.insert!(%Moneda{id: 4, nombre: "PESO", precio_en_usd: 0.005})
 
     # Insertar usuarios
-    Ledger.Repo.insert!(%Ledger.Schemas.Usuario{
+    usuario1 = Ledger.Repo.insert!(%Ledger.Schemas.Usuario{
       id: 1,
       nombre_usuario: "joaquin",
       fecha_nacimiento: ~D[2001-11-01]
     })
 
-    Ledger.Repo.insert!(%Ledger.Schemas.Usuario{
+    usuario2 = Ledger.Repo.insert!(%Ledger.Schemas.Usuario{
       id: 2,
       nombre_usuario: "francisco",
       fecha_nacimiento: ~D[1999-05-01]
     })
 
     # Crear cuentas para los usuarios
-    {:ok, _} =
+    {:ok, dolares_usuario_1} =
       Transacciones.run(:crear, "alta_cuenta", %{"-u" => 1, "-m" => "USDT", "-a" => 1000.0})
 
-    {:ok, _} =
-      Transacciones.run(:crear, "alta_cuenta", %{"-u" => 1, "-m" => "BTC", "-a" => 1000.0})
+    {:ok, vhs_usuario_2} =
+      Transacciones.run(:crear, "alta_cuenta", %{"-u" => 1, "-m" => "VHS", "-a" => 1000.0})
 
-    {:ok, _} =
+    {:ok, dolares_usuario_2} =
       Transacciones.run(:crear, "alta_cuenta", %{"-u" => 2, "-m" => "USDT", "-a" => 500.0})
 
     # Crear transacciones
-    {:ok, _} =
+    {:ok, transferencia_dolares} =
       Transacciones.run(:crear, "transferencia", %{"-o" => 1, "-d" => 2, "-m" => 1, "-a" => 100})
 
-    {:ok, _} = Transacciones.run(:crear, "swap", %{"-u" => 1, "-mo" => 1, "-md" => 2, "-a" => 50})
+    {:ok, swap_usuario1} = Transacciones.run(:crear, "swap", %{"-u" => 1, "-mo" => 1, "-md" => 2, "-a" => 50})
 
-    :ok
+    %{
+      usuario1: usuario1,
+      usuario2: usuario2,
+      transferencia_dolares: transferencia_dolares,
+      swap_usuario1: swap_usuario1,
+      dolares_usuario_1: dolares_usuario_1,
+      dolares_usuario_2: dolares_usuario_2,
+      vhs_usuario_2: vhs_usuario_2,
+    }
   end
 
   test "un usuario nuevo se crea correctamente" do
@@ -69,9 +77,10 @@ defmodule LedgerTest do
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
 
-  test "un usuario existente se puede ver" do
-    input = ["ver_usuario", "-id=1"]
-    esperado = "usuario: id: 1, nombre: joaquin, birthdate: 2001-11-01\n"
+  test "un usuario existente se puede ver",
+   %{usuario1: usuario1}  do
+    input = ["ver_usuario", "-id=#{usuario1.id}"]
+    esperado = "usuario: id: #{usuario1.id}, nombre: #{usuario1.nombre_usuario}, birthdate: #{usuario1.fecha_nacimiento}\n"
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
 
