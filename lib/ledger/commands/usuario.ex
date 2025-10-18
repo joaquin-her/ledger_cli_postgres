@@ -19,55 +19,24 @@ defmodule Ledger.Commands.Usuarios do
     end
   end
 
+
+
   def run(:editar, args) do
-    usuario = %{
-      nombre_usuario: args["-n"]
-    }
-
-    case Integer.parse(args["-id"]) do
-      :error ->
-        {:error, "id no es un numero"}
-
-      {id, _} ->
-        usuario_a_modificar = Ledger.Repo.get!(Usuario, id)
-
-        Usuario.changeset(usuario_a_modificar, usuario)
-        |> Ledger.Repo.update()
-        |> case do
-          {:ok, usuario_modificado} ->
-            {:ok, usuario_modificado}
-
-          {:error, changeset} ->
-            {:error, "editar_usuario: #{Utils.format_errors(changeset)}"}
-        end
+    with {:ok, id} <- Utils.validate_id(args["-id"], "-id") do
+      editar_usuario(id, args["-n"])
+    else
+      {:error, motivo} ->
+        {:error, "editar_usuario: #{motivo}"}
     end
   end
 
   # borra un usuario
   def run(:borrar, args) do
-    case Integer.parse(args["-id"]) do
-      :error ->
-        {:error, "id no es un numero"}
-
-      {id, _} ->
-        try do
-          Ledger.Repo.get!(Usuario, id)
-          |> Ledger.Repo.delete()
-          |> case do
-            {:ok, _usuario} ->
-              {:ok, "borrar_usuario: usuario eliminado correctamente"}
-
-            {:error, changeset} ->
-              {:error, "borrar_usuario: #{Utils.format_errors(changeset)}"}
-          end
-        rescue
-          Ecto.ConstraintError ->
-            {:error,
-             "borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas"}
-
-          e ->
-            {:error, "borrar_usuario: error al intentar eliminar al usuario #{inspect(e)}"}
-        end
+    with {:ok, id} <- Utils.validate_id(args["-id"], "-id") do
+      borrar_usuario(id)
+    else
+      {:error, mensaje} ->
+        {:error, "borrar_usuario: #{mensaje}"}
     end
   end
 
@@ -77,9 +46,10 @@ defmodule Ledger.Commands.Usuarios do
       case get_usuario(id) do
         nil ->
           {:error, "ver_usuario: usuario no encontrado"}
+
         usuario ->
           {:ok, usuario}
-        end
+      end
     else
       {:error, mensaje} ->
         {:error, "ver_usuario: #{mensaje}"}
@@ -94,6 +64,45 @@ defmodule Ledger.Commands.Usuarios do
   """
   def run(command, _) do
     {:error, "usuario: comando #{command}: no reconocido"}
+  end
+
+  defp borrar_usuario(id) do
+    try do
+      Ledger.Repo.get!(Usuario, id)
+      |> Ledger.Repo.delete()
+      |> case do
+        {:ok, _usuario} ->
+          {:ok, "borrar_usuario: usuario eliminado correctamente"}
+
+        {:error, changeset} ->
+          {:error, "borrar_usuario: #{Utils.format_errors(changeset)}"}
+      end
+    rescue
+      Ecto.ConstraintError ->
+        {:error,
+         "borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas"}
+
+      e ->
+        {:error, "borrar_usuario: error al intentar eliminar al usuario #{inspect(e)}"}
+    end
+  end
+
+  defp editar_usuario(id, nuevo_nombre) do
+    usuario = %{
+      nombre_usuario: nuevo_nombre
+    }
+
+    usuario_a_modificar = Ledger.Repo.get!(Usuario, id)
+
+    Usuario.changeset(usuario_a_modificar, usuario)
+    |> Ledger.Repo.update()
+    |> case do
+      {:ok, usuario_modificado} ->
+        {:ok, usuario_modificado}
+
+      {:error, changeset} ->
+        {:error, "editar_usuario: #{Utils.format_errors(changeset)}"}
+    end
   end
 
   defp get_usuario(id_usuario) do

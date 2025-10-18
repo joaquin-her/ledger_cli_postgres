@@ -92,7 +92,7 @@ defmodule LedgerTest do
   end
 
   test "un usuario existente no se puede ver si se pasa mal el id" do
-      input = ["ver_usuario", "-id=-1"]
+    input = ["ver_usuario", "-id=-1"]
     esperado = "error: ver_usuario: id_invalido: argumento=-id no puede ser negativo\n"
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
@@ -110,20 +110,23 @@ defmodule LedgerTest do
   end
 
   test "no se puede crear un usuario menor de 18 años" do
-    input = ["crear_usuario","-n=username" ,"-b=2014-04-20"]
+    input = ["crear_usuario", "-n=username", "-b=2014-04-20"]
     esperado = "error: crear_usuario: fecha_nacimiento: Debe ser mayor de edad\n"
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
   test "-n es necesario para crear un usuario" do
-    input = ["crear_usuario","-b=2004-04-20"]
+    input = ["crear_usuario", "-b=2004-04-20"]
     esperado = "error: crear_usuario: nombre_usuario: can't be blank\n"
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
   test "completar mal los 2 campos de crear usuario devuelve ambos errores" do
-    input = ["crear_usuario","-n=" ,"-b=2014-04-20"]
-    esperado = "error: crear_usuario: nombre_usuario: can't be blank; fecha_nacimiento: Debe ser mayor de edad\n"
+    input = ["crear_usuario", "-n=", "-b=2014-04-20"]
+
+    esperado =
+      "error: crear_usuario: nombre_usuario: can't be blank; fecha_nacimiento: Debe ser mayor de edad\n"
+
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 end

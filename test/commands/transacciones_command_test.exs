@@ -226,7 +226,7 @@ defmodule Commands.TransaccionesCommandTest do
   end
 
   test "no se puede realizar una transaccion en una moneda si uno de los dos usuarios no tiene una cuenta en esa moneda",
-  %{usuario1: usuario1, moneda1: moneda1, moneda2: moneda2} do
+       %{usuario1: usuario1, moneda1: moneda1, moneda2: moneda2} do
     # arrange
     # usuario1 ya tiene cuentas en moneda1 y moneda2.
     {:ok, usuario2} = Ledger.TestHelpers.crear_usuario_unico()

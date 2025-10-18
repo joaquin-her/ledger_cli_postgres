@@ -48,6 +48,7 @@ defmodule Ledger.Commands.UtilsTest do
 
     assert Utils.validate_id(:invalid, :flag) ==
              {:error, "id_invalido: argumento=flag ID invalido"}
+
     assert Utils.validate_id(nil, :flag) ==
              {:error, "id_invalido: argumento=flag es requerido"}
   end

@@ -30,9 +30,9 @@ defmodule Ledger.Commands.Utils do
     case not_an_id do
       nil ->
         {:error, "es requerido"}
+
       _ ->
         {:error, "ID invalido"}
-
     end
   end
 
