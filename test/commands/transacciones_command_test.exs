@@ -138,26 +138,43 @@ defmodule Commands.TransaccionesCommandTest do
   end
 
   test "se puede deshacer una transaccion si es la ultima de ambos usuarios asociados",
-    %{usuario1: usuario, moneda1: moneda1, moneda2: moneda2, alta_cuenta1: alta_cuenta1, alta_cuenta2: alta_cuenta2} do
+    %{usuario1: usuario, moneda1: moneda1} do
     args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
     {_, usuario2} = Usuarios.run(:crear, args)
+
+    args_alta_cuenta = %{
+      "-u" => "#{usuario2.id}",
+      "-m" => "#{moneda1.nombre}",
+      "-a" => "100"
+    }
 
     args_transacciones = %{
       "-o" => "#{usuario.id}",
       "-d" => "#{usuario2.id}",
       "-m" => "#{moneda1.id}",
-      "-a" => "100"
+      "-a" => "10"
     }
-
+    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_alta_cuenta)
+    # usuario1: 10 * moneda1 , 0* moneda2
+    # usuario2: 100 * moneda1
     {:ok, t} = Transacciones.run(:crear, "transferencia", args_transacciones)
+    # usuario1: 10 * moneda1 , 0* moneda2
+    # usuario2: 110 * moneda1
 
+    cuenta_origen = Ledger.Repo.get(Cuenta, t.cuenta_origen_id)
+    cuenta_destino = Ledger.Repo.get(Cuenta, t.cuenta_destino_id)
+
+    assert cuenta_origen.cantidad == Decimal.new("0.0")
+    assert cuenta_destino.cantidad == Decimal.new("110.0")
+
+    #act
     {:ok, _} = Transacciones.deshacer(t.id)
 
     cuenta_origen = Ledger.Repo.get(Cuenta, t.cuenta_origen_id)
     cuenta_destino = Ledger.Repo.get(Cuenta, t.cuenta_destino_id)
 
-    assert cuenta_origen.cantidad == Decimal.new("500.0")
-    assert cuenta_destino.cantidad == Decimal.new("1.05")
+    assert cuenta_origen.cantidad == Decimal.new("10.0")
+    assert cuenta_destino.cantidad == Decimal.new("100.0")
   end
 
   test "no se puede deshacer una transaccion si no es la ultima de ambos usuarios asociados" do
@@ -202,6 +219,9 @@ defmodule Commands.TransaccionesCommandTest do
     assert cuenta_destino.cantidad == Decimal.new("111.05")
   end
 
+  test "no se puede realizar una transaccion entre dos usuarios si el origen no tiene " do
+
+  end
   # Get transacciones
 
   # Update transacciones
