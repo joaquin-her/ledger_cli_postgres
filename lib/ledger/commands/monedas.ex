@@ -2,7 +2,7 @@ defmodule Ledger.Commands.Monedas do
   alias Ledger.Repo
   alias Ledger.Schemas.Moneda
   alias Ledger.Commands.Utils
-
+  import Ecto.Query
   # crea una moneda
   @doc """
   ## Crear
@@ -126,6 +126,13 @@ defmodule Ledger.Commands.Monedas do
     end
   end
 
+  def get_por_nombre(nombre_moneda) do
+    query_id_moneda = from(m in Moneda, where: m.nombre == ^nombre_moneda, select: m.id)
+    id_moneda = Ledger.Repo.one(query_id_moneda)
+    obtener_moneda(id_moneda)
+  end
+
+  @spec convertir(number(), any(), any()) :: float()
   @doc """
   Convierte una cantidad de una moneda a otra acorde a sus valores en dolares en el instante de la conversion.
   """

@@ -6,40 +6,35 @@ defmodule Commands.TransaccionesCommandTest do
   alias Ledger.Schemas.Cuenta
   alias Ledger.Commands.Monedas
   alias Ledger.Commands.Usuarios
+  alias Ledger.TestHelpers
   import Ecto.Query
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Ledger.Repo)
+    {_, usuario} = TestHelpers.crear_usuario_unico()
+    {_, moneda1} = TestHelpers.crear_moneda_unica(1000.0)
+    {_, moneda2} = TestHelpers.crear_moneda_unica(0.05)
+
+    {_, alta_cuenta1} = TestHelpers.crear_alta_cuenta(usuario.id, moneda1.nombre, 10)
+
+    {_, alta_cuenta2} = TestHelpers.crear_alta_cuenta(usuario.id, moneda2.nombre, 0)
+
+    %{
+      usuario1: usuario,
+      moneda1: moneda1,
+      moneda2: moneda2,
+      alta_cuenta1: alta_cuenta1,
+      alta_cuenta2: alta_cuenta2
+    }
   end
 
   # Create transacciones
-  test "se puede hacer una transaccion de tipo swap cuando un usuario tiene dos cuentas en esas monedas" do
-    # Arrange
-    args_usuario = %{"-n" => "pepe", "-b" => "2001-11-01"}
-    {_, usuario} = Usuarios.run(:crear, args_usuario)
-    args_moneda_origen = %{"-n" => "BTC", "-p" => "1000.0"}
-    args_moneda_destino = %{"-n" => "PESO", "-p" => "0.05"}
-    {_, moneda_o} = Monedas.run(:crear, args_moneda_origen)
-    {_, moneda_d} = Monedas.run(:crear, args_moneda_destino)
-
-    {_, alta_cuenta1} =
-      Transacciones.run(:crear, "alta_cuenta", %{
-        "-u" => "#{usuario.id}",
-        "-m" => "#{moneda_o.nombre}",
-        "-a" => "10"
-      })
-
-    {_, alta_cuenta2} =
-      Transacciones.run(:crear, "alta_cuenta", %{
-        "-u" => "#{usuario.id}",
-        "-m" => "#{moneda_d.nombre}",
-        "-a" => "0.0"
-      })
-
+  test "se puede hacer una transaccion de tipo swap cuando un usuario tiene dos cuentas en esas monedas",
+  %{usuario1: usuario, moneda1: moneda1, moneda2: moneda2, alta_cuenta1: alta_cuenta1, alta_cuenta2: alta_cuenta2} do
     args = %{
       "-u" => "#{usuario.id}",
-      "-mo" => "#{moneda_o.id}",
-      "-md" => "#{moneda_d.id}",
+      "-mo" => "#{moneda1.id}",
+      "-md" => "#{moneda2.id}",
       "-a" => "1.5"
     }
 
@@ -50,8 +45,8 @@ defmodule Commands.TransaccionesCommandTest do
     monto_esperado_en_origen = "8.5"
     monto_esperado_en_destino = "30000.0"
     assert transaccion.tipo == "swap"
-    assert transaccion.moneda_origen_id == moneda_o.id
-    assert transaccion.moneda_destino_id == moneda_d.id
+    assert transaccion.moneda_origen_id == moneda1.id
+    assert transaccion.moneda_destino_id == moneda2.id
     assert transaccion.monto == Decimal.new("1.5")
     assert transaccion.cuenta_origen_id == alta_cuenta1.cuenta_origen_id
     assert transaccion.cuenta_destino_id == alta_cuenta2.cuenta_origen_id
@@ -81,9 +76,10 @@ defmodule Commands.TransaccionesCommandTest do
     assert transaccion.monto == Decimal.new("15")
   end
 
-  test "se puede hacer un alta_cuenta en distintas monedas para un usuario" do
-    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
-    {_, usuario} = Usuarios.run(:crear, args)
+  test "se puede hacer un alta_cuenta en distintas monedas para un usuario",
+    %{usuario1: usuario} do
+    # usuario1 ya tiene 2 cuentas
+
     args_moneda1 = %{"-n" => "PAN", "-p" => "200"}
     args_moneda2 = %{"-n" => "FEO", "-p" => "100"}
     {_, moned1} = Monedas.run(:crear, args_moneda1)
@@ -105,16 +101,14 @@ defmodule Commands.TransaccionesCommandTest do
 
     query = from(t in Transaccion, where: t.tipo == ^"alta_cuenta", select: t)
     cuentas_usuario = Ledger.Repo.all(query)
-    assert Enum.count(cuentas_usuario) == 2
+    assert Enum.count(cuentas_usuario) == 4
   end
 
   test "se puede realizar una transaccion entre dos usuarios" do
-    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
-    {_, usuario1} = Usuarios.run(:crear, args)
-    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
-    {_, usuario2} = Usuarios.run(:crear, args)
-    args_moneda = %{"-n" => "BTC", "-p" => "200"}
-    {_, moneda} = Monedas.run(:crear, args_moneda)
+
+    {_, usuario1} = TestHelpers.crear_usuario_unico()
+    {_, usuario2} = TestHelpers.crear_usuario_unico()
+    {_, moneda} = TestHelpers.crear_moneda_unica(500)
     args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "500"}
     args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "1.05"}
     {:ok, cuenta1} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
@@ -143,22 +137,15 @@ defmodule Commands.TransaccionesCommandTest do
     assert transaccion.cuenta_destino_id == cuenta2.cuenta_origen_id
   end
 
-  test "se puede deshacer una transaccion si es la ultima de ambos usuarios asociados" do
-    args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
-    {_, usuario1} = Usuarios.run(:crear, args)
+  test "se puede deshacer una transaccion si es la ultima de ambos usuarios asociados",
+    %{usuario1: usuario, moneda1: moneda1, moneda2: moneda2, alta_cuenta1: alta_cuenta1, alta_cuenta2: alta_cuenta2} do
     args = %{"-n" => Faker.Pokemon.En.name(), "-b" => Faker.Date.date_of_birth()}
     {_, usuario2} = Usuarios.run(:crear, args)
-    args_moneda = %{"-n" => "BTC", "-p" => "200"}
-    {_, moneda} = Monedas.run(:crear, args_moneda)
-    args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "500"}
-    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "1.05"}
-    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
-    {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
 
     args_transacciones = %{
-      "-o" => "#{usuario1.id}",
+      "-o" => "#{usuario.id}",
       "-d" => "#{usuario2.id}",
-      "-m" => "#{moneda.id}",
+      "-m" => "#{moneda1.id}",
       "-a" => "100"
     }
 
