@@ -68,9 +68,9 @@ ALMOST DONE:
 /ledger balance -u1=<id-usuario> -m=<id-moneda> 
 /ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
 STARTED:
+/ledger deshacer_transaccion -id=<id-transaccion> 
 
 DOING: 
-/ledger deshacer_transaccion -id=<id-transaccion> 
 
 PENDING:
 /ledger ver_transaccion -id=<id-transaccion>

@@ -42,19 +42,6 @@ defmodule Ledger.Commands.Transacciones do
     end
   end
 
-  def run(:borrar, tipo, args) do
-    case tipo do
-      "swap" ->
-        swap(:borrar, args)
-
-      "transferencia" ->
-        transferencia(:borrar, args)
-
-      _ ->
-        {:error, "subcommando no encontrado"}
-    end
-  end
-
   def run(_, _, _) do
     {:error, "subcommando no encontrado"}
   end
@@ -75,9 +62,6 @@ defmodule Ledger.Commands.Transacciones do
     swap
     |> Transaccion.changeset_swap()
     |> insertar_transaccion("swap")
-  end
-
-  defp swap(:borrar, _) do
   end
 
   defp alta_cuenta(:crear, args) do
@@ -109,7 +93,7 @@ defmodule Ledger.Commands.Transacciones do
               })
 
             {:error, error} ->
-              {:error, error}
+              {:error, "alta_cuenta: #{error}"}
           end
 
         _ ->
@@ -127,7 +111,7 @@ defmodule Ledger.Commands.Transacciones do
       end
     else
       {:error, mensaje} ->
-        {:error, mensaje}
+        {:error, "alta_cuenta: #{mensaje}"}
     end
   end
 
@@ -152,11 +136,8 @@ defmodule Ledger.Commands.Transacciones do
       |> insertar_transaccion("transferencia")
     else
       {:error, mensaje} ->
-        {:error, mensaje}
+        {:error, "realizar_transferencia: #{mensaje}"}
     end
-  end
-
-  defp transferencia(:borrar, _) do
   end
 
   defp insertar_transaccion(transaccion, funcion) do
@@ -167,6 +148,22 @@ defmodule Ledger.Commands.Transacciones do
 
       {:error, changeset} ->
         {:error, "#{funcion}: #{Utils.format_errors(changeset)}"}
+    end
+  end
+
+  def deshacer_transaccion(tipo, arguments) do
+    case tipo do
+      "swap" ->
+        deshacer(arguments["-id"])
+
+      "transferencia" ->
+        deshacer(arguments["-id"])
+
+      "alta_cuenta" ->
+        deshacer(arguments["-id"])
+
+      _ ->
+        {:error, "deshacer: subcommando no encontrado"}
     end
   end
 

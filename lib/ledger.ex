@@ -23,7 +23,10 @@ defmodule Ledger.CLI do
             Commands.Monedas.run(String.to_atom(verbo), arguments)
 
           [verbo, "usuario"] ->
-            Commands.Usuarios.run(String.to_atom(verbo), arguments)
+            case Commands.Usuarios.run(String.to_atom(verbo), arguments) do
+              {:ok, usuario} -> handle_usuario(usuario)
+              {:error, error} -> IO.puts("error: #{error}")
+            end
 
           [verbo, "cuenta"] ->
             Commands.Cuentas.run(String.to_atom(verbo), arguments)
@@ -35,12 +38,16 @@ defmodule Ledger.CLI do
             Commands.Transacciones.run(:crear, tipo, arguments)
 
           ["deshacer", tipo] ->
-            Commands.Transacciones.run(:borrar, tipo, arguments)
+            Commands.Transacciones.deshacer_transaccion(tipo, arguments)
 
           _ ->
             {:error, "ledgerCLI: Commando desconocido"}
         end
     end
+  end
+
+  defp handle_usuario(usuario) do
+    IO.puts("usuario creado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
   end
 
   # returns a map with the parsed arguments as key-value pairs.
