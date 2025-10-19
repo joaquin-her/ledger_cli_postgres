@@ -56,7 +56,9 @@ defmodule Ledger.CLI do
             case Commands.Transacciones.run(:crear, tipo, arguments) do
               {:ok, transaccion} ->
                 print_transaccion(transaccion)
-              {:error, error} -> IO.puts("[error] #{error}")
+
+              {:error, error} ->
+                IO.puts("[error] #{error}")
             end
 
           ["deshacer", "transaccion"] ->
@@ -64,9 +66,10 @@ defmodule Ledger.CLI do
               {:ok, transaccion} ->
                 t = format_raw(transaccion)
                 IO.puts("[info][undo] transaccion #{t.tipo}: id=#{t.id}")
-              {:error, error} -> IO.puts("[error] #{error}")
-            end
 
+              {:error, error} ->
+                IO.puts("[error] #{error}")
+            end
 
           _ ->
             IO.puts("[error] ledgerCLI: Commando desconocido")
@@ -126,14 +129,14 @@ defmodule Ledger.CLI do
 
   defp format_transaccion(t) do
     %{
-        id: t.id,
-        tipo: t.tipo,
-        monto: t.monto,
-        moneda_origen: t.moneda_origen.nombre,
-        moneda_destino: t.moneda_destino.nombre,
-        titular_origen: t.cuenta_origen.usuario.nombre_usuario,
-        titular_destino: t.cuenta_destino.usuario.nombre_usuario
-      }
+      id: t.id,
+      tipo: t.tipo,
+      monto: t.monto,
+      moneda_origen: t.moneda_origen.nombre,
+      moneda_destino: t.moneda_destino.nombre,
+      titular_origen: t.cuenta_origen.usuario.nombre_usuario,
+      titular_destino: t.cuenta_destino.usuario.nombre_usuario
+    }
   end
 
   defp preload_transaccion(transaccion) do
@@ -152,8 +155,10 @@ defmodule Ledger.CLI do
   end
 
   defp print_transaccion(transaccion) do
-    t = preload_transaccion(transaccion)
+    t =
+      preload_transaccion(transaccion)
       |> format_transaccion()
+
     IO.puts(
       "#{t.id} | #{t.tipo} | #{t.monto} | #{t.moneda_origen} | #{t.moneda_destino} | #{t.titular_origen} | #{t.titular_destino}"
     )
@@ -165,9 +170,12 @@ defmodule Ledger.CLI do
         Enum.each(balances, fn b ->
           IO.puts("#{b.moneda} | #{b.balance}")
         end)
-      {:error, mensaje} -> IO.puts("[error] #{mensaje}")
+
+      {:error, mensaje} ->
+        IO.puts("[error] #{mensaje}")
     end
   end
+
   # returns a map with the parsed arguments as key-value pairs.
   def parse_args(args) do
     args

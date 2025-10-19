@@ -174,7 +174,7 @@ defmodule Commands.TransaccionesCommandTest do
     assert cuenta_destino.cantidad == Decimal.new("110.0")
 
     # act
-    {:ok, _} = Transacciones.deshacer_transaccion( %{"-id"=>"#{t.id}"})
+    {:ok, _} = Transacciones.deshacer_transaccion(%{"-id" => "#{t.id}"})
 
     cuenta_origen = Ledger.Repo.get(Cuenta, t.cuenta_origen_id)
     cuenta_destino = Ledger.Repo.get(Cuenta, t.cuenta_destino_id)
@@ -213,7 +213,7 @@ defmodule Commands.TransaccionesCommandTest do
 
     {:ok, _} = Transacciones.run(:crear, "transferencia", args_transaccion_extra)
     # act
-    {:error, mensaje} = Transacciones.deshacer_transaccion(%{"-id"=>"#{t.id}"})
+    {:error, mensaje} = Transacciones.deshacer_transaccion(%{"-id" => "#{t.id}"})
     # assert
     cuenta_origen = Ledger.Repo.get(Cuenta, t.cuenta_origen_id)
     cuenta_destino = Ledger.Repo.get(Cuenta, t.cuenta_destino_id)

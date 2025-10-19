@@ -7,8 +7,10 @@ defmodule Ledger.Commands.Transacciones do
 
   def obtener_transacciones_de_usuario(usuario_id) do
     from(t in Transaccion,
-      left_join: co in Cuenta, on: t.cuenta_origen_id == co.id,
-      left_join: cd in Cuenta, on: t.cuenta_destino_id == cd.id,
+      left_join: co in Cuenta,
+      on: t.cuenta_origen_id == co.id,
+      left_join: cd in Cuenta,
+      on: t.cuenta_destino_id == cd.id,
       where: co.usuario_id == ^usuario_id or cd.usuario_id == ^usuario_id,
       select: t
     )
@@ -206,13 +208,14 @@ defmodule Ledger.Commands.Transacciones do
       case Ledger.Repo.get(Transaccion, id) do
         nil ->
           {:error, "Transaccion no encontrada"}
-      transaccion ->
-        {:ok, transaccion}
+
+        transaccion ->
+          {:ok, transaccion}
       end
     else
       {:error, mensaje} ->
-        {:error,"ver_transaccion: #{mensaje}"}
-      end
+        {:error, "ver_transaccion: #{mensaje}"}
+    end
   end
 
   def return_transacciones() do

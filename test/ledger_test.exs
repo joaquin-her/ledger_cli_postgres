@@ -209,15 +209,18 @@ defmodule LedgerTest do
   end
 
   test "transacciones subcommand puede mostrar todas las transacciones",
-    %{
-      dolares_usuario_1: t1,
-      vhs_usuario_2: t2,
-      dolares_usuario_2: t3,
-      transferencia_dolares: t4,
-      swap_usuario1: t5,
-    } do
+       %{
+         dolares_usuario_1: t1,
+         vhs_usuario_2: t2,
+         dolares_usuario_2: t3,
+         transferencia_dolares: t4,
+         swap_usuario1: t5
+       } do
     input = String.split("transacciones")
-    esperado = "#{t1.id} | alta_cuenta | 1000 | USDT | USDT | joaquin | joaquin\n#{t2.id} | alta_cuenta | 1000 | VHS | VHS | joaquin | joaquin\n#{t3.id} | alta_cuenta | 500.0 | USDT | USDT | francisco | francisco\n#{t4.id} | transferencia | 100 | USDT | USDT | joaquin | francisco\n#{t5.id} | swap | 50 | USDT | VHS | joaquin | joaquin\n"
+
+    esperado =
+      "#{t1.id} | alta_cuenta | 1000 | USDT | USDT | joaquin | joaquin\n#{t2.id} | alta_cuenta | 1000 | VHS | VHS | joaquin | joaquin\n#{t3.id} | alta_cuenta | 500.0 | USDT | USDT | francisco | francisco\n#{t4.id} | transferencia | 100 | USDT | USDT | joaquin | francisco\n#{t5.id} | swap | 50 | USDT | VHS | joaquin | joaquin\n"
+
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
@@ -225,7 +228,10 @@ defmodule LedgerTest do
     {:ok, usuario} = TestHelpers.crear_usuario_unico()
     {:ok, t1} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 1000)
     input = String.split("transacciones -id=#{usuario.id}")
-    esperado = "#{t1.id} | alta_cuenta | 1000 | USDT | USDT | #{usuario.nombre_usuario} | #{usuario.nombre_usuario}\n"
+
+    esperado =
+      "#{t1.id} | alta_cuenta | 1000 | USDT | USDT | #{usuario.nombre_usuario} | #{usuario.nombre_usuario}\n"
+
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
@@ -241,7 +247,10 @@ defmodule LedgerTest do
     {:ok, usuario} = TestHelpers.crear_usuario_unico()
     {:ok, transaccion} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
     input = String.split("ver_transaccion -id=#{transaccion.id}")
-    esperado = "#{transaccion.id} | alta_cuenta | 0 | USDT | USDT | #{usuario.nombre_usuario} | #{usuario.nombre_usuario}\n"
+
+    esperado =
+      "#{transaccion.id} | alta_cuenta | 0 | USDT | USDT | #{usuario.nombre_usuario} | #{usuario.nombre_usuario}\n"
+
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
@@ -253,18 +262,22 @@ defmodule LedgerTest do
   end
 
   test "realizar una transferencia devuelve informacion sobre la transaccion realizada",
-  %{usuario1: usuario, usuario2: usuario2} do
+       %{usuario1: usuario, usuario2: usuario2} do
     {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
     input = String.split("realizar_transferencia -o=#{usuario.id} -d=#{usuario2.id} -m=1 -a=0.5")
-    esperado = "| transferencia | 0.5 | USDT | USDT | joaquin | francisco\n" #+1 porque es la que le sigue
+    # +1 porque es la que le sigue
+    esperado = "| transferencia | 0.5 | USDT | USDT | joaquin | francisco\n"
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
 
   test "realizar una transferencia con algun error devuelve informacion sobre la equivocacion",
-  %{usuario1: usuario, usuario2: usuario2} do
+       %{usuario1: usuario, usuario2: usuario2} do
     {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
     input = String.split("realizar_transferencia -o=#{usuario.id} -d=#{usuario2.id} -m=4 -a=0.5")
-    esperado = "[error] realizar_transferencia: get_cuenta: cuenta de usuario 1 no encontrada para moneda id 4\n"
+
+    esperado =
+      "[error] realizar_transferencia: get_cuenta: cuenta de usuario 1 no encontrada para moneda id 4\n"
+
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
@@ -275,7 +288,7 @@ defmodule LedgerTest do
   end
 
   test "deshacer una transaccion muestra informacion sobre la transaccion realizada",
-  %{usuario1: usuario} do
+       %{usuario1: usuario} do
     {:ok, transaccion} = TestHelpers.crear_swap(usuario.id, 1, 2, 0.5)
     input = String.split("deshacer_transaccion -id=#{transaccion.id}")
     esperado = "[info][undo] transaccion swap: id="
@@ -283,15 +296,18 @@ defmodule LedgerTest do
   end
 
   test "deshacer una transaccion con un error muestra informacion sobre el error",
-  %{dolares_usuario_1: dolares_usuario_1} do
+       %{dolares_usuario_1: dolares_usuario_1} do
     input = String.split("deshacer_transaccion -id=#{dolares_usuario_1.id}")
-    esperado = "[error] deshacer_transaccion: No se puede deshacer la transaccion porque no es la ultima realizada por la cuenta de los usuarios\n"
+
+    esperado =
+      "[error] deshacer_transaccion: No se puede deshacer la transaccion porque no es la ultima realizada por la cuenta de los usuarios\n"
+
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
   describe "balance" do
     test "balance en varias monedas se imprime correctamente",
-    %{usuario1: usuario} do
+         %{usuario1: usuario} do
       {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 3, 1200)
       input = String.split("balance -id=#{usuario.id}")
       esperado = "USDT | 850.0\nVHS | 1000.014285714285714285\nJOA | 1200.0\n"
@@ -299,14 +315,14 @@ defmodule LedgerTest do
     end
 
     test "balance en una monedas se imprime correctamente",
-    %{usuario1: usuario} do
+         %{usuario1: usuario} do
       input = String.split("balance -id=#{usuario.id} -m=4")
       esperado = "PESO | 700180000\n"
       assert capture_io(fn -> CLI.main(input) end) == esperado
     end
 
     test "balance puede imprimir errores",
-    %{usuario1: usuario} do
+         %{usuario1: usuario} do
       input = String.split("balance -id=#{usuario.id} -m=peso")
       esperado = "[error] balance: id_invalido: argumento=-m no puede ser una cadena\n"
       assert capture_io(fn -> CLI.main(input) end) == esperado

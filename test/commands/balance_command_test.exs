@@ -33,7 +33,7 @@ defmodule Commands.BalanceCommandTest do
     {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.id, 15)
 
     # Act
-    {:ok, balance} = Balance.get_balance(%{"-id"=>"#{usuario1.id}"})
+    {:ok, balance} = Balance.get_balance(%{"-id" => "#{usuario1.id}"})
 
     # Assert
     esperado = [%{balance: Decimal.new("15.0"), moneda: btc.nombre}]
@@ -50,7 +50,7 @@ defmodule Commands.BalanceCommandTest do
     {:ok, _} = TestHelpers.crear_swap(usuario1.id, ghr.id, btc.id, 2)
 
     # Act
-    {:ok, balance} = Balance.get_balance(%{"-id"=>"#{usuario1.id}"})
+    {:ok, balance} = Balance.get_balance(%{"-id" => "#{usuario1.id}"})
 
     # Assert
     balance_esperado = [
@@ -71,7 +71,7 @@ defmodule Commands.BalanceCommandTest do
     {:ok, _} = TestHelpers.crear_swap(usuario1.id, ghr.id, btc.id, 2)
 
     # Act
-    {:ok, balance} = Balance.get_balance(%{"-id"=>"#{usuario1.id}","-m"=>"#{ghr.id}"})
+    {:ok, balance} = Balance.get_balance(%{"-id" => "#{usuario1.id}", "-m" => "#{ghr.id}"})
     # Assert
     balance_esperado = [
       %{balance: Decimal.new("10.0"), moneda: "#{ghr.nombre}"}
