@@ -11,6 +11,7 @@ defmodule Ledger.CLI do
     case command do
       "balance" ->
         Commands.Balance.get_balance(arguments)
+        |> print_balance()
 
       "transacciones" ->
         case Commands.Transacciones.run(arguments) do
@@ -158,6 +159,15 @@ defmodule Ledger.CLI do
     )
   end
 
+  defp print_balance(tupla) do
+    case tupla do
+      {:ok, balances} ->
+        Enum.each(balances, fn b ->
+          IO.puts("#{b.moneda} | #{b.balance}")
+        end)
+      {:error, mensaje} -> IO.puts("[error] #{mensaje}")
+    end
+  end
   # returns a map with the parsed arguments as key-value pairs.
   def parse_args(args) do
     args

@@ -280,4 +280,21 @@ defmodule LedgerTest do
     esperado = "[error] deshacer_transaccion: No se puede deshacer la transaccion porque no es la ultima realizada por la cuenta de los usuarios\n"
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
+
+  describe "balance" do
+    test "balance en varias monedas se imprime correctamente",
+    %{usuario1: usuario} do
+      {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 3, 1200)
+      input = String.split("balance -id=#{usuario.id}")
+      esperado = "USDT | 850.0\nVHS | 1000.014285714285714285\nJOA | 1200.0\n"
+      assert capture_io(fn -> CLI.main(input) end) == esperado
+    end
+
+    test "balance en una monedas se imprime correctamente",
+    %{usuario1: usuario} do
+      input = String.split("balance -id=#{usuario.id} -m=4")
+      esperado = "PESO | 700180000\n"
+      assert capture_io(fn -> CLI.main(input) end) == esperado
+    end
+  end
 end
