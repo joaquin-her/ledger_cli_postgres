@@ -280,6 +280,25 @@ defmodule LedgerTest do
 
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
+    test "realizar un swap devuelve informacion sobre la transaccion",
+       %{usuario1: usuario} do
+    input = String.split("realizar_swap -u=#{usuario.id} -mo=1 -md=2 -a=0.5")
+
+    esperado =
+      " | swap | 0.5 | USDT | VHS | joaquin | joaquin\n"
+
+    assert capture_io(fn -> CLI.main(input) end) =~ esperado
+  end
+    test "realizar un swap con algun error devuelve informacion sobre la equivocacion",
+       %{usuario1: usuario, usuario2: usuario2} do
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
+    input = String.split("realizar_swap -o=#{usuario.id} -d=#{usuario2.id} -m=4 -a=0.5")
+
+    esperado =
+      "[error] realizar_swap: id_invalido: argumento=-u es requerido\n"
+
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
 
   test "realizar un comando desconocido muestra un error" do
     input = String.split("bancar_a_boca -o=1 -d=2 -m=4 -a=0.5")

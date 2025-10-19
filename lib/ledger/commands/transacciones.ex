@@ -76,21 +76,22 @@ defmodule Ledger.Commands.Transacciones do
   end
 
   defp swap(:crear, args) do
-    {:ok, cuenta_origen} = Cuentas.run(:ver, %{"-u" => args["-u"], "-m" => args["-mo"]})
-    {:ok, cuenta_destino} = Cuentas.run(:ver, %{"-u" => args["-u"], "-m" => args["-md"]})
-
-    swap = %{
-      tipo: "swap",
-      moneda_origen_id: args["-mo"],
-      moneda_destino_id: args["-md"],
-      cuenta_origen_id: cuenta_origen.id,
-      cuenta_destino_id: cuenta_destino.id,
-      monto: args["-a"]
-    }
-
-    swap
-    |> Transaccion.changeset_swap()
-    |> insertar_transaccion("swap")
+    with {:ok, cuenta_origen} <- Cuentas.run(:ver, %{"-u" => args["-u"], "-m" => args["-mo"]}),
+        {:ok, cuenta_destino} <- Cuentas.run(:ver, %{"-u" => args["-u"], "-m" => args["-md"]}) do
+          %{
+            tipo: "swap",
+            moneda_origen_id: args["-mo"],
+            moneda_destino_id: args["-md"],
+            cuenta_origen_id: cuenta_origen.id,
+            cuenta_destino_id: cuenta_destino.id,
+            monto: args["-a"]
+          }
+          |> Transaccion.changeset_swap()
+          |> insertar_transaccion("swap")
+    else
+      {:error, mensaje} ->
+        {:error, "realizar_swap: #{mensaje}"}
+    end
   end
 
   defp crear_cuenta(id_moneda, id_usuario) do
