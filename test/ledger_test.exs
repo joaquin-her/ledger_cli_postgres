@@ -229,6 +229,14 @@ defmodule LedgerTest do
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
+  test "transacciones subcommand puede mostrar errores de ejecucion" do
+    {:ok, usuario} = TestHelpers.crear_usuario_unico()
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 1000)
+    input = String.split("transacciones -id=joa")
+    esperado = "[error] transacciones: id_invalido: argumento=-id no puede ser una cadena\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
   test "transacciones subcommand puede mostrar una transaccion especifica" do
     {:ok, usuario} = TestHelpers.crear_usuario_unico()
     {:ok, transaccion} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
@@ -294,6 +302,13 @@ defmodule LedgerTest do
     %{usuario1: usuario} do
       input = String.split("balance -id=#{usuario.id} -m=4")
       esperado = "PESO | 700180000\n"
+      assert capture_io(fn -> CLI.main(input) end) == esperado
+    end
+
+    test "balance puede imprimir errores",
+    %{usuario1: usuario} do
+      input = String.split("balance -id=#{usuario.id} -m=peso")
+      esperado = "[error] balance: id_invalido: argumento=-m no puede ser una cadena\n"
       assert capture_io(fn -> CLI.main(input) end) == esperado
     end
   end

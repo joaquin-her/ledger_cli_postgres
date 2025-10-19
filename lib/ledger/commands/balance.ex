@@ -17,13 +17,7 @@ defmodule Ledger.Commands.Balance do
       case Utils.validate_id(args["-m"], "-m") do
         # tengo id usuario y id moneda
         {:ok, id_moneda_conversion} ->
-          moneda = Ledger.Repo.get(Moneda, id_moneda_conversion)
-          balance =
-            balance
-            |> convertir_balance_a_precio_id_moneda_conversion(moneda)
-            |> reduce_balances()
-            |> Map.put(:moneda, moneda.nombre)
-          {:ok, [balance]}
+          calcular_balance_a_moneda(balance, id_moneda_conversion)
 
         # tengo id usuario y id moneda es invalido
         {:error, mensaje} ->
@@ -31,16 +25,28 @@ defmodule Ledger.Commands.Balance do
             {:error, "balance: #{mensaje}"}
           else
             balance =
-              Enum.map(balance, fn b ->
-                %{
-                  balance: b.balance,
-                  moneda: b.moneda
-                }
-              end)
+              Enum.map(balance, fn b -> format_balance(b) end)
             {:ok, balance}
           end
       end
     end
+  end
+  defp calcular_balance_a_moneda(balance, id_moneda_conversion) do
+    moneda = Ledger.Repo.get(Moneda, id_moneda_conversion)
+    balance =
+      balance
+      |> convertir_balance_a_precio_id_moneda_conversion(moneda)
+      |> reduce_balances()
+      |> Map.put(:moneda, moneda.nombre)
+      {:ok, [balance]}
+    end
+
+
+  defp format_balance(moneda) do
+    %{
+      balance: moneda.balance,
+      moneda: moneda.moneda
+    }
   end
 
   defp get_balances_totales(id_usuario) do
