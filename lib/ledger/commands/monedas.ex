@@ -68,8 +68,8 @@ defmodule Ledger.Commands.Monedas do
   # lista una moneda
   def run(:ver, args) do
     with {:ok, id} <- Utils.validate_id(args["-id"], "-id"),
-        {:ok, moneda} <- obtener_moneda(id) do
-          {:ok, moneda}
+         {:ok, moneda} <- obtener_moneda(id) do
+      {:ok, moneda}
     else
       {:error, message} ->
         {:error, "ver_moneda: #{message}"}

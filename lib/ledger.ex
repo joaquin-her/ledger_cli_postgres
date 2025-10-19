@@ -1,5 +1,6 @@
 defmodule Ledger.CLI do
   alias Ledger.Commands
+  alias Ledger.Schemas.Transaccion
 
   @moduledoc """
   Module to handle command line interface for Ledger application.
@@ -13,7 +14,10 @@ defmodule Ledger.CLI do
         Commands.Balance.get_balance(arguments)
 
       "transacciones" ->
-        Commands.Transacciones.run(arguments)
+        case Commands.Transacciones.run(arguments) do
+          {:ok, transaccion} -> handle_transacciones(transaccion)
+          {:error, error} -> IO.puts("[error] #{error}")
+        end
 
       _ ->
         command = String.split(command, "_")
@@ -33,12 +37,17 @@ defmodule Ledger.CLI do
 
           ["alta", "cuenta"] ->
             case Commands.Transacciones.run(:crear, "alta_cuenta", arguments) do
-              {:ok, transaccion} -> IO.puts("[info][created] #{transaccion.tipo}: id_moneda:#{transaccion.moneda_origen_id}, id_transaccion:#{transaccion.id}")
-              {:error, error} -> IO.puts("[error] #{error}")
+              {:ok, transaccion} ->
+                IO.puts(
+                  "[info][created] #{transaccion.tipo}: id_moneda:#{transaccion.moneda_origen_id}, id_transaccion:#{transaccion.id}"
+                )
+
+              {:error, error} ->
+                IO.puts("[error] #{error}")
             end
 
           ["ver", "transaccion"] ->
-            Commands.Transacciones.run(:ver, arguments)
+            Commands.Transacciones.ver_transaccion(arguments)
 
           ["realizar", tipo] ->
             Commands.Transacciones.run(:crear, tipo, arguments)
@@ -52,16 +61,74 @@ defmodule Ledger.CLI do
     end
   end
 
-  defp handle_moneda(verbo, moneda) when verbo == "ver" ,do: IO.puts("[info] moneda: id=#{moneda.id}, nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}")
-  defp handle_moneda(verbo, moneda) when verbo == "editar" ,do: IO.puts("[info][updated] moneda: id=#{moneda.id}, nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}")
-  defp handle_moneda(verbo, moneda) when verbo == "crear" ,do: IO.puts("[info][created] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}")
-  defp handle_moneda(verbo, moneda) when verbo == "borrar" ,do: IO.puts("[info][deleted] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}")
+  defp handle_moneda(verbo, moneda) when verbo == "ver",
+    do:
+      IO.puts(
+        "[info] moneda: id=#{moneda.id}, nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}"
+      )
 
-  defp handle_usuario("crear", usuario) ,do: IO.puts("usuario creado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
-  defp handle_usuario("editar", usuario) ,do: IO.puts("usuario editado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
-  defp handle_usuario("borrar", usuario) ,do: IO.puts("usuario borrado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
-  defp handle_usuario("ver", usuario) ,do: IO.puts("usuario: id: #{usuario.id}, nombre: #{usuario.nombre_usuario}, birthdate: #{usuario.fecha_nacimiento}")
+  defp handle_moneda(verbo, moneda) when verbo == "editar",
+    do:
+      IO.puts(
+        "[info][updated] moneda: id=#{moneda.id}, nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}"
+      )
 
+  defp handle_moneda(verbo, moneda) when verbo == "crear",
+    do:
+      IO.puts(
+        "[info][created] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}"
+      )
+
+  defp handle_moneda(verbo, moneda) when verbo == "borrar",
+    do:
+      IO.puts(
+        "[info][deleted] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}"
+      )
+
+  defp handle_usuario("crear", usuario),
+    do:
+      IO.puts("usuario creado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
+
+  defp handle_usuario("editar", usuario),
+    do:
+      IO.puts("usuario editado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
+
+  defp handle_usuario("borrar", usuario),
+    do:
+      IO.puts("usuario borrado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
+
+  defp handle_usuario("ver", usuario),
+    do:
+      IO.puts(
+        "usuario: id: #{usuario.id}, nombre: #{usuario.nombre_usuario}, birthdate: #{usuario.fecha_nacimiento}"
+      )
+
+  defp handle_transacciones(transacciones \\ %Transaccion{}) do
+    transacciones
+    |> Ledger.Repo.preload([
+      :moneda_destino,
+      :moneda_origen,
+      cuenta_origen: [:usuario],
+      cuenta_destino: [:usuario]
+    ])
+    |> Enum.each(fn t ->
+      print_transaccion(%{
+        id: t.id,
+        tipo: t.tipo,
+        monto: t.monto,
+        moneda_origen: t.moneda_origen.nombre,
+        moneda_destino: t.moneda_destino.nombre,
+        titular_origen: t.cuenta_origen.usuario.nombre_usuario,
+        titular_destino: t.cuenta_destino.usuario.nombre_usuario
+      })
+    end)
+  end
+
+  defp print_transaccion(t) do
+    IO.puts(
+      "#{t.id} | #{t.tipo} | #{t.monto} | #{t.moneda_origen} | #{t.moneda_destino} | #{t.titular_origen} | #{t.titular_destino}"
+    )
+  end
 
   # returns a map with the parsed arguments as key-value pairs.
   def parse_args(args) do

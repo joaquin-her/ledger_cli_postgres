@@ -1,16 +1,37 @@
 defmodule Ledger.Commands.Transacciones do
   alias Ledger.Commands.Cuentas
   alias Ledger.Schemas.Transaccion
+  alias Ledger.Schemas.Cuenta
   alias Ledger.Commands.Utils
   import Ecto.Query
 
-  def run(:ver, _) do
-    {:ok, :ok}
+  def obtener_transacciones_de_usuario(usuario_id) do
+    from(t in Transaccion,
+      left_join: co in Cuenta, on: t.cuenta_origen_id == co.id,
+      left_join: cd in Cuenta, on: t.cuenta_destino_id == cd.id,
+      where: co.usuario_id == ^usuario_id or cd.usuario_id == ^usuario_id,
+      select: t
+    )
+    |> Ledger.Repo.all()
+    |> case do
+      transacciones ->
+        {:ok, transacciones}
+    end
   end
 
-  def run(_) do
-    {:ok, :ok}
+  def run(args) do
+    with {:ok, id} <- Utils.validate_id(args["-id"], "-id") do
+      obtener_transacciones_de_usuario(id)
+    else
+      {:error, message} ->
+        if is_nil(args["-id"]) do
+          return_transacciones()
+        else
+          {:error, "transacciones: #{message}"}
+        end
+    end
   end
+
 
   @doc """
   ## Crear
@@ -76,21 +97,23 @@ defmodule Ledger.Commands.Transacciones do
       tipo: "alta_cuenta",
       monto: monto
     }
+
     Transaccion.changese_alta_cuenta(%Transaccion{}, transaccion)
     |> insertar_transaccion("alta_cuenta")
   end
 
   defp alta_cuenta(:crear, args) do
     with {:ok, id_moneda} <- Utils.validate_id(args["-m"], "-m"),
-          {:ok, id_usuario} <- Utils.validate_id(args["-u"], "-u"),
-          true <- Cuentas.exists?(id_usuario, id_moneda),
-          {:ok, cuenta} <- Cuentas.run(:ver, args) do
-            monto = args["-a"]
-            insertar_transaccion_alta_cuenta(id_moneda, cuenta.id, monto)
+         {:ok, id_usuario} <- Utils.validate_id(args["-u"], "-u"),
+         true <- Cuentas.exists?(id_usuario, id_moneda),
+         {:ok, cuenta} <- Cuentas.run(:ver, args) do
+      monto = args["-a"]
+      insertar_transaccion_alta_cuenta(id_moneda, cuenta.id, monto)
     else
       false ->
         crear_cuenta(args["-m"], args["-u"])
         alta_cuenta(:crear, args)
+
       {:error, motivo} ->
         {:error, "alta_cuenta: #{motivo}"}
     end
@@ -175,14 +198,24 @@ defmodule Ledger.Commands.Transacciones do
     end
   end
 
+  @spec ver_transaccion(any()) :: {:error, <<_::200>>} | {:ok, any()}
   def ver_transaccion(id_transaccion) do
-    case Ledger.Repo.get(Transaccion, id_transaccion) do
-      nil ->
-        {:error, "Transaccion no encontrada"}
-
+    with {:ok, id} <- Utils.validate_id(id_transaccion) do
+      case Ledger.Repo.get(Transaccion, id) do
+        nil ->
+          {:error, "Transaccion no encontrada"}
       transaccion ->
         {:ok, transaccion}
-    end
+      end
+    else
+      {:error, mensaje} ->
+        {:error,"ver_transaccion: #{mensaje}"}
+      end
+  end
+
+  def return_transacciones() do
+    transacciones = Ledger.Repo.all(Transaccion)
+    {:ok, transacciones}
   end
 
   def es_la_ultima_transaccion?(transaction, account_id) do

@@ -148,8 +148,11 @@ defmodule LedgerTest do
   end
 
   test "se notifica cuando no se puede borrar a un usuario" do
-    input = ["borrar_usuario","-id=1"]
-    esperado = "[error] borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas\n"
+    input = ["borrar_usuario", "-id=1"]
+
+    esperado =
+      "[error] borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas\n"
+
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
@@ -180,7 +183,10 @@ defmodule LedgerTest do
   test "se puede borrar una moneda que no tiene cuentas asociadas" do
     {:ok, moneda} = TestHelpers.crear_moneda_unica(100.0)
     input = String.split("borrar_moneda -id=#{moneda.id}")
-    esperado = "[info][deleted] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}"
+
+    esperado =
+      "[info][deleted] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}"
+
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
 
@@ -202,5 +208,35 @@ defmodule LedgerTest do
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
 
+  test "transacciones subcommand puede mostrar todas las transacciones",
+    %{
+      dolares_usuario_1: t1,
+      vhs_usuario_2: t2,
+      dolares_usuario_2: t3,
+      transferencia_dolares: t4,
+      swap_usuario1: t5,
+    } do
+    input = String.split("transacciones")
+    esperado = "#{t1.id} | alta_cuenta | 1000 | USDT | USDT | joaquin | joaquin\n#{t2.id} | alta_cuenta | 1000 | VHS | VHS | joaquin | joaquin\n#{t3.id} | alta_cuenta | 500.0 | USDT | USDT | francisco | francisco\n#{t4.id} | transferencia | 100 | USDT | USDT | joaquin | francisco\n#{t5.id} | swap | 50 | USDT | VHS | joaquin | joaquin\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
 
+  test "transacciones subcommand puede mostrar varias transacciones de un usuario" do
+    {:ok, usuario} = TestHelpers.crear_usuario_unico()
+    {:ok, t1} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 1000)
+    input = String.split("transacciones -id=#{usuario.id}")
+    esperado = "#{t1.id} | alta_cuenta | 1000 | USDT | USDT | #{usuario.nombre_usuario} | #{usuario.nombre_usuario}\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "transacciones subcommand puede mostrar una transaccion especifica" do
+    {:ok, usuario} = TestHelpers.crear_usuario_unico()
+    {:ok, transaccion} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
+    input = String.split("ver_transaccion -id=#{transaccion.id}")
+    esperado = ""
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "" do
+  end
 end

@@ -13,13 +13,13 @@ defmodule Ledger.Commands.Cuentas do
   """
   def run(:alta, args) do
     with {:ok, id_moneda} <- Utils.validate_id(args["-m"], "-m"),
-      {:ok, id_usuario} <- Utils.validate_id(args["-id"], "-id") do
-        insertar_cuenta(id_moneda, id_usuario)
-      else
+         {:ok, id_usuario} <- Utils.validate_id(args["-id"], "-id") do
+      insertar_cuenta(id_moneda, id_usuario)
+    else
       {:error, mensaje} ->
         {:error, "alta_cuenta: #{mensaje}"}
-      end
     end
+  end
 
   def run(:ver, args) do
     with {:ok, id_usuario} <- Utils.validate_id(args["-u"], "-u"),
@@ -42,12 +42,13 @@ defmodule Ledger.Commands.Cuentas do
 
         {:error, changeset} ->
           {:error, "crear_cuenta: #{Utils.format_errors(changeset)}"}
-        end
+      end
     rescue
       Ecto.ConstraintError ->
         {:error, "alta_cuenta: el usuario ya tiene una cuenta en esa moneda"}
     end
   end
+
   @doc """
   Obtiene la cuenta asociada al usuario y moneda especificados.
 
