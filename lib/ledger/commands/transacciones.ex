@@ -163,32 +163,26 @@ defmodule Ledger.Commands.Transacciones do
     end
   end
 
-  def deshacer_transaccion(tipo, arguments) do
-    case tipo do
-      "swap" ->
-        deshacer(arguments["-id"])
-
-      "transferencia" ->
-        deshacer(arguments["-id"])
-
-      "alta_cuenta" ->
-        deshacer(arguments["-id"])
-
-      _ ->
-        {:error, "deshacer: subcommando no encontrado"}
-    end
-  end
-
   @doc """
   Deshace la transaccion con el id proporcionado si es la ultima de los usuarios intervinientes agregando su inversa en la base de datos
   """
-  def deshacer(id_transaccion) do
+  def deshacer_transaccion(arguments) do
+    with {:ok, id} <- Utils.validate_id(arguments["-id"], "-id") do
+      deshacer(id)
+    else
+      {:error, message} ->
+        {:errror, "deshacer transaccion: #{message}"}
+    end
+  end
+
+  defp deshacer(id_transaccion) do
     with {:ok, id} <- Utils.validate_id(id_transaccion),
          {:ok, transaccion} <- ver_transaccion(id),
          # true <- es_la_ultima_transaccion?(transaccion, transaccion.cuenta_origen_id)
          true <- es_la_ultima_transaccion?(transaccion, transaccion.cuenta_destino_id) do
       transaccion = %Transaccion{
-        moneda_origen_id: transaccion.moneda_origen_id,
+        moneda_origen_id: transaccion.moneda_destino_id,
+        moneda_destino_id: transaccion.moneda_origen_id,
         cuenta_origen_id: transaccion.cuenta_destino_id,
         cuenta_destino_id: transaccion.cuenta_origen_id,
         monto: transaccion.monto,

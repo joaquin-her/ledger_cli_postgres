@@ -58,10 +58,11 @@ defmodule Ledger.CLI do
               {:error, error} -> IO.puts("[error] #{error}")
             end
 
-          ["deshacer", tipo] ->
-            case Commands.Transacciones.deshacer_transaccion(tipo, arguments) do
+          ["deshacer", "transaccion"] ->
+            case Commands.Transacciones.deshacer_transaccion(arguments) do
               {:ok, transaccion} ->
-                print_transaccion(transaccion)
+                t = format_raw(transaccion)
+                IO.puts("[info][undo] transaccion #{t.tipo}: id=#{t.id}")
               {:error, error} -> IO.puts("[error] #{error}")
             end
 
@@ -142,6 +143,11 @@ defmodule Ledger.CLI do
       cuenta_origen: [:usuario],
       cuenta_destino: [:usuario]
     ])
+  end
+
+  defp format_raw(transaccion) do
+    preload_transaccion(transaccion)
+    |> format_transaccion()
   end
 
   defp print_transaccion(transaccion) do

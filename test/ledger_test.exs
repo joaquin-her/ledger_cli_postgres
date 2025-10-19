@@ -270,14 +270,14 @@ defmodule LedgerTest do
   %{usuario1: usuario} do
     {:ok, transaccion} = TestHelpers.crear_swap(usuario.id, 1, 2, 0.5)
     input = String.split("deshacer_transaccion -id=#{transaccion.id}")
-    esperado = "[info]"
-    assert capture_io(fn -> CLI.main(input) end) == esperado
+    esperado = "[info][undo] transaccion swap: id="
+    assert capture_io(fn -> CLI.main(input) end) =~ esperado
   end
 
   test "deshacer una transaccion con un error muestra informacion sobre el error",
-  %{transferencia_dolares: transferencia} do
-    input = String.split("deshacer_transaccion -id=#{transferencia.id}")
-    esperado = "[error] deshacer: \n"
+  %{dolares_usuario_1: dolares_usuario_1} do
+    input = String.split("deshacer_transaccion -id=#{dolares_usuario_1.id}")
+    esperado = "[error] deshacer_transaccion: No se puede deshacer la transaccion porque no es la ultima realizada por la cuenta de los usuarios\n"
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 end
