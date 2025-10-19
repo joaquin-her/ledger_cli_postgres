@@ -1,21 +1,35 @@
 # Ledger
 
-**TODO: Add description**
+## Table of Contents
+
+- [Installation](#installation)
+- [Running](#running)
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `ledger` to your list of dependencies in `mix.exs`:
+To get started with this project, follow these steps:
 
-```elixir
-def deps do
-  [
-    {:ledger, "~> 0.1.0"}
-  ]
-end
-```
+1. **Install Dependencies:**
+   Ensure you have Erl installed (Erl 1.16 or higher). Then install the required packages:
+   ```sh
+   mix deps.get
+   ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/ledger>.
+## Running
+
+Once your environment is set up, you can run the project using the following commands:
+
+1. **Docker Compose Postgres:**
+   ```sh
+   docker compose up
+   ```
+
+2. **Compile the project:**
+   ```sh
+   mix build
+   ```
+
+3. **Run Binary:**
+   ```sh
+   ./ledger <command> <args>
 

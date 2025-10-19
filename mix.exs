@@ -5,14 +5,14 @@ defmodule Ledger.MixProject do
     [
       app: :ledger,
       version: "0.2.0",
-      elixir: "~> 1.18",
+      elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       escript: escripts(),
       name: "ledger",
       aliases: aliases(),
       test_coverage: [
-        summary: [threshold: 80],
+        summary: [threshold: 90],
         output: ".volumes/cover"
       ]
     ]
@@ -36,13 +36,14 @@ defmodule Ledger.MixProject do
       # {:dep_from_hexpm, "~> 0.3.0"},
       {:ecto_sql, "~> 3.10"},
       {:postgrex, ">= 0.0.0"},
-      {:faker, "~> 0.19.0-alpha.1", only: :test}
+      {:faker, "~> 0.19.0-alpha.1"}
     ]
   end
 
   defp aliases do
     [
-      "remake-db": ["ecto.drop ", " ecto.create ", " ecto.migrate"]
+      "remake-db": ["ecto.drop ", " ecto.create ", " ecto.migrate"],
+      build: ["remake-db", "escript.build"]
     ]
   end
 end
