@@ -146,4 +146,10 @@ defmodule LedgerTest do
 
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
+
+  test "se notifica cuando no se puede borrar a un usuario" do
+    input = ["borrar_usuario","-id=1"]
+    esperado = "error: borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
 end
