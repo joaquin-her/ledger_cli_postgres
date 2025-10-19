@@ -67,20 +67,9 @@ defmodule Ledger.Commands.Monedas do
 
   # lista una moneda
   def run(:ver, args) do
-    with {:ok, id} <- Utils.validate_required(args["-id"], "-id") do
-      case id do
-        "all" ->
-          {:ok, Repo.all(Moneda)}
-
-        _ ->
-          case obtener_moneda(id) do
-            {:error, mensaje} ->
-              {:error, "ver_moneda: #{mensaje}"}
-
-            {:ok, moneda} ->
-              {:ok, moneda}
-          end
-      end
+    with {:ok, id} <- Utils.validate_id(args["-id"], "-id"),
+        {:ok, moneda} <- obtener_moneda(id) do
+          {:ok, moneda}
     else
       {:error, message} ->
         {:error, "ver_moneda: #{message}"}
@@ -120,12 +109,6 @@ defmodule Ledger.Commands.Monedas do
         {:ok, moneda}
     end
   end
-
-  # def get_por_nombre(nombre_moneda) do
-  #   query_id_moneda = from(m in Moneda, where: m.nombre == ^nombre_moneda, select: m.id)
-  #   id_moneda = Ledger.Repo.one(query_id_moneda)
-  #   obtener_moneda(id_moneda)
-  # end
 
   @spec convertir(number(), any(), any()) :: float()
   @doc """

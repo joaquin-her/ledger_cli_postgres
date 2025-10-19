@@ -40,19 +40,6 @@ defmodule TestCommandMonedas do
     assert mensaje == esperado
   end
 
-  test "obtener todas las monedas con -id='all'= :ok" do
-    args = %{"-n" => "USDT", "-p" => "1.0"}
-    Monedas.run(:crear, args)
-    args = %{"-n" => "BTC", "-p" => "100.0"}
-    Monedas.run(:crear, args)
-    args = %{"-n" => "ETH", "-p" => "1022.0"}
-    Monedas.run(:crear, args)
-
-    {status, monedas} = Monedas.run(:ver, %{"-id" => "all"})
-    assert status == :ok
-    assert Enum.all?(monedas, fn m -> m.nombre in ["USDT", "BTC", "ETH"] end)
-  end
-
   test "ingresar moneda con nombre de mas de 4 letras da error " do
     args = %{"-n" => "dolar", "-p" => "1.0"}
     error = {:error, "crear_usuario: nombre: should be at most 4 character(s)"}
@@ -115,6 +102,15 @@ defmodule TestCommandMonedas do
     {status, error} = Monedas.run(:editar, argumentos_modificacion)
     assert status == :error
     assert error == "editar_moneda: moneda no encontrada"
+  end
+
+  test "modificar precio de moneda con valor negativo = :error" do
+    argumentos_creacion = %{"-n" => "ETH", "-p" => "3600.0"}
+    {_, moneda} = Monedas.run(:crear, argumentos_creacion)
+    argumentos_modificacion = %{"-id" => "#{moneda.id}", "-p" => "-20"}
+    {status, error} = Monedas.run(:editar, argumentos_modificacion)
+    assert status == :error
+    assert error == "editar_moneda: precio_en_usd: must be greater than 0"
   end
 
   test "modificar precio de moneda con valor invalido = :error" do

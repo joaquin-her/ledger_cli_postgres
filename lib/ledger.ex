@@ -20,7 +20,10 @@ defmodule Ledger.CLI do
 
         case command do
           [verbo, "moneda"] ->
-            Commands.Monedas.run(String.to_atom(verbo), arguments)
+            case Commands.Monedas.run(String.to_atom(verbo), arguments) do
+              {:ok, moneda} -> handle_moneda(verbo, moneda)
+              {:error, error} -> IO.puts("error: #{error}")
+            end
 
           [verbo, "usuario"] ->
             case Commands.Usuarios.run(String.to_atom(verbo), arguments) do
@@ -46,29 +49,16 @@ defmodule Ledger.CLI do
     end
   end
 
-  defp handle_usuario(verbo, usuario) do
-    case verbo do
-      "ver" ->
-        IO.puts(
-          "usuario: id: #{usuario.id}, nombre: #{usuario.nombre_usuario}, birthdate: #{usuario.fecha_nacimiento}"
-        )
+  defp handle_moneda(verbo, moneda) when verbo == "ver" ,do: IO.puts("[info] moneda: id=#{moneda.id}, nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}")
+  defp handle_moneda(verbo, moneda) when verbo == "editar" ,do: IO.puts("[info][updated] moneda: id=#{moneda.id}, nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}")
+  defp handle_moneda(verbo, moneda) when verbo == "crear" ,do: IO.puts("[info][created] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}")
+  defp handle_moneda(verbo, moneda) when verbo == "borrar" ,do: IO.puts("[info][deleted] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}")
 
-      "crear" ->
-        IO.puts(
-          "usuario creado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}"
-        )
+  defp handle_usuario("crear", usuario) ,do: IO.puts("usuario creado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
+  defp handle_usuario("editar", usuario) ,do: IO.puts("usuario editado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
+  defp handle_usuario("borrar", usuario) ,do: IO.puts("usuario borrado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}")
+  defp handle_usuario("ver", usuario) ,do: IO.puts("usuario: id: #{usuario.id}, nombre: #{usuario.nombre_usuario}, birthdate: #{usuario.fecha_nacimiento}")
 
-      "editar" ->
-        IO.puts(
-          "usuario editado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}"
-        )
-
-      "borrar" ->
-        IO.puts(
-          "usuario borrado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}"
-        )
-    end
-  end
 
   # returns a map with the parsed arguments as key-value pairs.
   def parse_args(args) do

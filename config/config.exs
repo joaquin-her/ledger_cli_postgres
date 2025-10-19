@@ -4,7 +4,8 @@ config :ledger, Ledger.Repo,
   database: "ledger_db",
   username: "postgres",
   password: "postgres",
-  hostname: "localhost"
+  hostname: "localhost",
+  log: false
 
 config :ledger, ecto_repos: [Ledger.Repo]
 import_config "#{config_env()}.exs"

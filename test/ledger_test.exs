@@ -152,4 +152,41 @@ defmodule LedgerTest do
     esperado = "error: borrar_usuario: usuario no puede ser eliminado porque tiene transacciones asosciadas\n"
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
+
+  test "se puede ver la informacion de una moneda correctamente" do
+    input = String.split("ver_moneda -id=2")
+    esperado = "[info] moneda: id=2, nombre=VHS, precio_en_usd=3.5e3\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "una moneda que no existe muestra un error" do
+    input = String.split("ver_moneda -id=12")
+    esperado = "error: ver_moneda: moneda no encontrada\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "se puede crear una moneda y ver su informacion" do
+    input = String.split("crear_moneda -n=ABC -p=123.00")
+    esperado = "[info][created] moneda: nombre=ABC, precio_en_usd=123.0, id="
+    assert capture_io(fn -> CLI.main(input) end) =~ esperado
+  end
+
+  test "se puede modificar el valor de una moneda" do
+    input = String.split("editar_moneda -id=2 -p=100.0")
+    esperado = "[info][updated] moneda: id=2, nombre=VHS, precio_en_usd=100.0\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "se puede borrar una moneda que no tiene cuentas asociadas" do
+    {:ok, moneda} = TestHelpers.crear_moneda_unica(100.0)
+    input = String.split("borrar_moneda -id=#{moneda.id}")
+    esperado = "[info][deleted] moneda: nombre=#{moneda.nombre}, precio_en_usd=#{moneda.precio_en_usd}, id=#{moneda.id}"
+    assert capture_io(fn -> CLI.main(input) end) =~ esperado
+  end
+
+  test "otro comando para moneda devuelve error" do
+    input = String.split("aumentar_moneda -id=2")
+    esperado = "error: monedas: aumentar: se desconoce como comando valido\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
 end
