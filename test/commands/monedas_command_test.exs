@@ -35,7 +35,7 @@ defmodule TestCommandMonedas do
 
   test "obtener moneda inexistente = :error" do
     {status, mensaje} = Monedas.run(:ver, %{"-id" => "999"})
-    esperado = "ver_moneda: Moneda no encontrada"
+    esperado = "ver_moneda: moneda no encontrada"
     assert status == :error
     assert mensaje == esperado
   end
@@ -130,7 +130,7 @@ defmodule TestCommandMonedas do
     argumentos_modificacion = %{"-id" => "invalid_value", "-p" => "10.0"}
     {status, error} = Monedas.run(:editar, argumentos_modificacion)
     assert status == :error
-    assert error == "editar_moneda: id: is invalid"
+    assert error == "editar_moneda: id_invalido: argumento=-id no puede ser una cadena"
   end
 
   test "modificar una moneda cambia su campo updated_at" do
@@ -162,7 +162,7 @@ defmodule TestCommandMonedas do
 
   test "borrar una moneda que no existe retorna error" do
     argumentos_eliminacion = %{"-id" => "99999"}
-    esperado = "borrar_moneda: Moneda no encontrada con el ID proporcionado"
+    esperado = "borrar_moneda: moneda no encontrada"
     {status, mensaje} = Monedas.run(:borrar, argumentos_eliminacion)
     assert status == :error
     assert mensaje == esperado

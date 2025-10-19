@@ -62,6 +62,11 @@ defmodule Ledger.CLI do
         IO.puts(
           "usuario editado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}"
         )
+
+      "borrar" ->
+        IO.puts(
+          "usuario borrado correctamente: id=#{usuario.id}, nombre=#{usuario.nombre_usuario}"
+        )
     end
   end
 

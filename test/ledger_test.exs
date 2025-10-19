@@ -1,4 +1,5 @@
 defmodule LedgerTest do
+  alias Ledger.TestHelpers
   alias Ledger.Commands.Transacciones
   alias Ledger.Schemas.Moneda
   alias Ledger.Schemas.Transaccion
@@ -133,6 +134,16 @@ defmodule LedgerTest do
   test "editar un usuario devuelve la informacion con los campos modificados" do
     input = ["editar_usuario", "-id=1", "-n=joaquin2"]
     esperado = "usuario editado correctamente: id=1, nombre=joaquin2\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "borrar a un usuario devuelve informacion sobre el usuario eliminado" do
+    {:ok, usuario3} = TestHelpers.crear_usuario_unico()
+    input = ["borrar_usuario", "-id=#{usuario3.id}"]
+
+    esperado =
+      "usuario borrado correctamente: id=#{usuario3.id}, nombre=#{usuario3.nombre_usuario}\n"
+
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 end

@@ -42,4 +42,11 @@ defmodule Ledger.Commands.Utils do
       {:error, error} -> {:error, "id_invalido: argumento=#{flag} #{error}"}
     end
   end
+
+  def validate_required(value, flag) do
+    case value do
+      nil -> {:error, "argumento_requerido: #{flag}"}
+      _ -> {:ok, value}
+    end
+  end
 end

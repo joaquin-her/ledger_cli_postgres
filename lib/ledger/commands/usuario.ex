@@ -69,8 +69,8 @@ defmodule Ledger.Commands.Usuarios do
       Ledger.Repo.get!(Usuario, id)
       |> Ledger.Repo.delete()
       |> case do
-        {:ok, _usuario} ->
-          {:ok, "borrar_usuario: usuario eliminado correctamente"}
+        {:ok, usuario} ->
+          {:ok, usuario}
 
         {:error, changeset} ->
           {:error, "borrar_usuario: #{Utils.format_errors(changeset)}"}

@@ -52,4 +52,16 @@ defmodule Ledger.Commands.UtilsTest do
     assert Utils.validate_id(nil, :flag) ==
              {:error, "id_invalido: argumento=flag es requerido"}
   end
+
+  describe "validate_required/2" do
+    test "returns an error tuple when the value is nil" do
+      result = Utils.validate_required(nil, "--flag")
+      assert {:error, "argumento_requerido: --flag"} == result
+    end
+
+    test "returns an ok tuple with the value when it is not nil" do
+      result = Utils.validate_required("value", "--flag")
+      assert {:ok, "value"} == result
+    end
+  end
 end
