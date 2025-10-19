@@ -237,9 +237,16 @@ defmodule LedgerTest do
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
+  test "transacciones subcommand puede mostrar un error al intentar mostrar una transaccion especifica" do
+    {:ok, _} = TestHelpers.crear_usuario_unico()
+    input = String.split("ver_transaccion -id=-1")
+    esperado = "[error] ver_transaccion: id_invalido: argumento=-id no puede ser negativo\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
   test "realizar una transferencia devuelve informacion sobre la transaccion realizada",
   %{usuario1: usuario, usuario2: usuario2} do
-    {:ok, transaccion} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
     input = String.split("realizar_transferencia -o=#{usuario.id} -d=#{usuario2.id} -m=1 -a=0.5")
     esperado = "| transferencia | 0.5 | USDT | USDT | joaquin | francisco\n" #+1 porque es la que le sigue
     assert capture_io(fn -> CLI.main(input) end) =~ esperado
@@ -250,6 +257,27 @@ defmodule LedgerTest do
     {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
     input = String.split("realizar_transferencia -o=#{usuario.id} -d=#{usuario2.id} -m=4 -a=0.5")
     esperado = "[error] realizar_transferencia: get_cuenta: cuenta de usuario 1 no encontrada para moneda id 4\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "realizar un comando desconocido muestra un error" do
+    input = String.split("bancar_a_boca -o=1 -d=2 -m=4 -a=0.5")
+    esperado = "[error] ledgerCLI: Commando desconocido\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "deshacer una transaccion muestra informacion sobre la transaccion realizada",
+  %{usuario1: usuario} do
+    {:ok, transaccion} = TestHelpers.crear_swap(usuario.id, 1, 2, 0.5)
+    input = String.split("deshacer_transaccion -id=#{transaccion.id}")
+    esperado = "[info]"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
+  end
+
+  test "deshacer una transaccion con un error muestra informacion sobre el error",
+  %{transferencia_dolares: transferencia} do
+    input = String.split("deshacer_transaccion -id=#{transferencia.id}")
+    esperado = "[error] deshacer: \n"
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 end

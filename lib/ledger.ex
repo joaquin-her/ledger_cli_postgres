@@ -1,6 +1,5 @@
 defmodule Ledger.CLI do
   alias Ledger.Commands
-  alias Ledger.Schemas.Transaccion
 
   @moduledoc """
   Module to handle command line interface for Ledger application.
@@ -68,7 +67,7 @@ defmodule Ledger.CLI do
 
 
           _ ->
-            {:error, "ledgerCLI: Commando desconocido"}
+            IO.puts("[error] ledgerCLI: Commando desconocido")
         end
     end
   end
