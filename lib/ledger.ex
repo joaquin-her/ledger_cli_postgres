@@ -22,17 +22,20 @@ defmodule Ledger.CLI do
           [verbo, "moneda"] ->
             case Commands.Monedas.run(String.to_atom(verbo), arguments) do
               {:ok, moneda} -> handle_moneda(verbo, moneda)
-              {:error, error} -> IO.puts("error: #{error}")
+              {:error, error} -> IO.puts("[error] #{error}")
             end
 
           [verbo, "usuario"] ->
             case Commands.Usuarios.run(String.to_atom(verbo), arguments) do
               {:ok, usuario} -> handle_usuario(verbo, usuario)
-              {:error, error} -> IO.puts("error: #{error}")
+              {:error, error} -> IO.puts("[error] #{error}")
             end
 
-          [verbo, "cuenta"] ->
-            Commands.Cuentas.run(String.to_atom(verbo), arguments)
+          ["alta", "cuenta"] ->
+            case Commands.Transacciones.run(:crear, "alta_cuenta", arguments) do
+              {:ok, transaccion} -> IO.puts("[info][created] #{transaccion.tipo}: id_moneda:#{transaccion.moneda_origen_id}, id_transaccion:#{transaccion.id}")
+              {:error, error} -> IO.puts("[error] #{error}")
+            end
 
           ["ver", "transaccion"] ->
             Commands.Transacciones.run(:ver, arguments)

@@ -1,7 +1,5 @@
 defmodule Ledger.Commands.Transacciones do
   alias Ledger.Commands.Cuentas
-  alias Ledger.Schemas.Moneda
-  alias Ledger.Schemas.Cuenta
   alias Ledger.Schemas.Transaccion
   alias Ledger.Commands.Utils
   import Ecto.Query
@@ -64,54 +62,37 @@ defmodule Ledger.Commands.Transacciones do
     |> insertar_transaccion("swap")
   end
 
+  defp crear_cuenta(id_moneda, id_usuario) do
+    args = %{"-id" => "#{id_usuario}", "-m" => "#{id_moneda}"}
+    Cuentas.run(:alta, args)
+  end
+
+  defp insertar_transaccion_alta_cuenta(id_moneda, id_cuenta, monto) do
+    transaccion = %{
+      cuenta_origen_id: id_cuenta,
+      cuenta_destino_id: id_cuenta,
+      moneda_origen_id: id_moneda,
+      moneda_destino_id: id_moneda,
+      tipo: "alta_cuenta",
+      monto: monto
+    }
+    Transaccion.changese_alta_cuenta(%Transaccion{}, transaccion)
+    |> insertar_transaccion("alta_cuenta")
+  end
+
   defp alta_cuenta(:crear, args) do
-    with nombre_moneda <- args["-m"],
-         {:ok, id_usuario} <- Utils.validate_id(args["-u"], "-u") do
-      monto = args["-a"]
-      query_id_moneda = from(m in Moneda, where: m.nombre == ^nombre_moneda, select: m.id)
-      id_moneda = Ledger.Repo.one(query_id_moneda)
-
-      query_cuenta_origen =
-        from(c in Cuenta,
-          where: c.usuario_id == ^id_usuario and c.moneda_id == ^id_moneda,
-          select: c
-        )
-
-      cuenta = Ledger.Repo.one(query_cuenta_origen)
-
-      case cuenta do
-        nil ->
-          args = %{"-id" => "#{id_usuario}", "-m" => "#{id_moneda}"}
-
-          Cuentas.run(:alta, args)
-          |> case do
-            {:ok, _} ->
-              alta_cuenta(:crear, %{
-                "-m" => "#{nombre_moneda}",
-                "-u" => "#{id_usuario}",
-                "-a" => monto
-              })
-
-            {:error, error} ->
-              {:error, "alta_cuenta: #{error}"}
-          end
-
-        _ ->
-          transaccion = %{
-            cuenta_origen_id: cuenta.id,
-            cuenta_destino_id: cuenta.id,
-            moneda_origen_id: id_moneda,
-            moneda_destino_id: id_moneda,
-            tipo: "alta_cuenta",
-            monto: monto
-          }
-
-          Transaccion.changese_alta_cuenta(%Transaccion{}, transaccion)
-          |> insertar_transaccion("alta_cuenta")
-      end
+    with {:ok, id_moneda} <- Utils.validate_id(args["-m"], "-m"),
+          {:ok, id_usuario} <- Utils.validate_id(args["-u"], "-u"),
+          true <- Cuentas.exists?(id_usuario, id_moneda),
+          {:ok, cuenta} <- Cuentas.run(:ver, args) do
+            monto = args["-a"]
+            insertar_transaccion_alta_cuenta(id_moneda, cuenta.id, monto)
     else
-      {:error, mensaje} ->
-        {:error, "alta_cuenta: #{mensaje}"}
+      false ->
+        crear_cuenta(args["-m"], args["-u"])
+        alta_cuenta(:crear, args)
+      {:error, motivo} ->
+        {:error, "alta_cuenta: #{motivo}"}
     end
   end
 

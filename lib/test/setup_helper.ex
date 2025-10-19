@@ -19,10 +19,10 @@ defmodule Ledger.TestHelpers do
     })
   end
 
-  def crear_alta_cuenta(usuario_id, moneda_nombre, monto) do
+  def crear_alta_cuenta(usuario_id, id_moneda, monto) do
     Transacciones.run(:crear, "alta_cuenta", %{
       "-u" => "#{usuario_id}",
-      "-m" => "#{moneda_nombre}",
+      "-m" => "#{id_moneda}",
       "-a" => "#{monto}"
     })
   end

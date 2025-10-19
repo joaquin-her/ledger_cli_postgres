@@ -67,14 +67,18 @@ TRANSACCION
 ALMOST DONE:
 /ledger balance -u1=<id-usuario> -m=<id-moneda> 
 /ledger deshacer_transaccion -id=<id-transaccion> 
+. transacciones con monto insuficiente
+. transacciones entre cuentas sin monedas comun 
 
 STARTED:
 
 DOING: 
 /ledger realizar_transferencia -o=<id-usuario-origen> -d=<id-usuario-destino> - m=<id-moneda> -a=<monto>
-. transacciones entre cuentas sin monedas comun 
 
 PENDING:
 /ledger ver_transaccion -id=<id-transaccion>
-. transacciones con monto insuficiente
-. remover async true para evitar deadlocks en los tests o refactorizar tests para usar faker
+
+
+se pueden tener montos negativos de monedas
+la moneda dolar no esta por defecto incluida en la base de datos al iniciarse
+al realizar alta cuenta con una cuenta ya creada, se puede agregar a una cuenta

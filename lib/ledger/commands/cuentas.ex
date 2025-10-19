@@ -12,32 +12,14 @@ defmodule Ledger.Commands.Cuentas do
   \t["-m"]:str (id de la moneda)\n
   """
   def run(:alta, args) do
-    {id_moneda, _} = Integer.parse(args["-m"])
-    {id_usuario, _} = Integer.parse(args["-id"])
-
-    cuenta = %{
-      moneda_id: id_moneda,
-      usuario_id: id_usuario
-    }
-
-    try do
-      Cuenta.changeset(%Cuenta{}, cuenta)
-      |> Ledger.Repo.insert()
-      |> case do
-        {:ok, cuenta} ->
-          {:ok, cuenta}
-
-        {:error, changeset} ->
-          {:error, "crear_cuenta: #{Utils.format_errors(changeset)}"}
+    with {:ok, id_moneda} <- Utils.validate_id(args["-m"], "-m"),
+      {:ok, id_usuario} <- Utils.validate_id(args["-id"], "-id") do
+        insertar_cuenta(id_moneda, id_usuario)
+      else
+      {:error, mensaje} ->
+        {:error, "alta_cuenta: #{mensaje}"}
       end
-    rescue
-      Ecto.ConstraintError ->
-        {:error, "alta_cuenta: el usuario ya tiene una cuenta en esa moneda"}
-
-      e ->
-        {:error, "alta_cuenta: error al intentar crear la cuenta #{inspect(e)}"}
     end
-  end
 
   def run(:ver, args) do
     with {:ok, id_usuario} <- Utils.validate_id(args["-u"], "-u"),
@@ -50,6 +32,22 @@ defmodule Ledger.Commands.Cuentas do
     end
   end
 
+  defp insertar_cuenta(id_moneda, id_usuario) do
+    try do
+      Cuenta.changeset(%Cuenta{}, %{moneda_id: id_moneda, usuario_id: id_usuario})
+      |> Ledger.Repo.insert()
+      |> case do
+        {:ok, cuenta} ->
+          {:ok, cuenta}
+
+        {:error, changeset} ->
+          {:error, "crear_cuenta: #{Utils.format_errors(changeset)}"}
+        end
+    rescue
+      Ecto.ConstraintError ->
+        {:error, "alta_cuenta: el usuario ya tiene una cuenta en esa moneda"}
+    end
+  end
   @doc """
   Obtiene la cuenta asociada al usuario y moneda especificados.
 

@@ -1,5 +1,5 @@
 defmodule Commands.TransaccionesCommandTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
   alias Ledger.Schemas.Transaccion
   alias Ledger.Commands.Transacciones
   alias Ledger.Commands.Cuentas
@@ -15,9 +15,9 @@ defmodule Commands.TransaccionesCommandTest do
     {_, moneda1} = TestHelpers.crear_moneda_unica(1000.0)
     {_, moneda2} = TestHelpers.crear_moneda_unica(0.05)
 
-    {_, alta_cuenta1} = TestHelpers.crear_alta_cuenta(usuario.id, moneda1.nombre, 10)
+    {_, alta_cuenta1} = TestHelpers.crear_alta_cuenta(usuario.id, moneda1.id, 10)
 
-    {_, alta_cuenta2} = TestHelpers.crear_alta_cuenta(usuario.id, moneda2.nombre, 0)
+    {_, alta_cuenta2} = TestHelpers.crear_alta_cuenta(usuario.id, moneda2.id, 0)
 
     %{
       usuario1: usuario,
@@ -69,7 +69,7 @@ defmodule Commands.TransaccionesCommandTest do
     {:ok, cuenta} = Cuentas.run(:alta, %{"-id" => "#{usuario.id}", "-m" => "#{moneda.id}"})
 
     # act
-    args = %{"-u" => "#{usuario.id}", "-m" => "#{moneda.nombre}", "-a" => "15"}
+    args = %{"-u" => "#{usuario.id}", "-m" => "#{moneda.id}", "-a" => "15"}
     {status, transaccion} = Transacciones.run(:crear, "alta_cuenta", args)
     # assert
     assert status == :ok
@@ -91,8 +91,8 @@ defmodule Commands.TransaccionesCommandTest do
     {_, moned1} = Monedas.run(:crear, args_moneda1)
     {_, moned2} = Monedas.run(:crear, args_moneda2)
 
-    args_cuenta_1 = %{"-u" => "#{usuario.id}", "-m" => "#{moned1.nombre}", "-a" => "80"}
-    args_cuenta_2 = %{"-u" => "#{usuario.id}", "-m" => "#{moned2.nombre}", "-a" => "800"}
+    args_cuenta_1 = %{"-u" => "#{usuario.id}", "-m" => "#{moned1.id}", "-a" => "80"}
+    args_cuenta_2 = %{"-u" => "#{usuario.id}", "-m" => "#{moned2.id}", "-a" => "800"}
 
     args_transaccion3 = %{
       "-u" => "#{usuario.id}",
@@ -114,8 +114,8 @@ defmodule Commands.TransaccionesCommandTest do
     {_, usuario1} = TestHelpers.crear_usuario_unico()
     {_, usuario2} = TestHelpers.crear_usuario_unico()
     {_, moneda} = TestHelpers.crear_moneda_unica(500)
-    args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "500"}
-    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "1.05"}
+    args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.id}", "-a" => "500"}
+    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.id}", "-a" => "1.05"}
     {:ok, cuenta1} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
     {:ok, cuenta2} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
 
@@ -149,7 +149,7 @@ defmodule Commands.TransaccionesCommandTest do
 
     args_alta_cuenta = %{
       "-u" => "#{usuario2.id}",
-      "-m" => "#{moneda1.nombre}",
+      "-m" => "#{moneda1.id}",
       "-a" => "100"
     }
 
@@ -190,8 +190,8 @@ defmodule Commands.TransaccionesCommandTest do
     {_, usuario2} = Usuarios.run(:crear, args)
     args_moneda = %{"-n" => "BTC", "-p" => "200"}
     {_, moneda} = Monedas.run(:crear, args_moneda)
-    args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.nombre}", "-a" => "500"}
-    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.nombre}", "-a" => "1.05"}
+    args_cuenta_1 = %{"-u" => "#{usuario1.id}", "-m" => "#{moneda.id}", "-a" => "500"}
+    args_cuenta_2 = %{"-u" => "#{usuario2.id}", "-m" => "#{moneda.id}", "-a" => "1.05"}
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_1)
     {:ok, _} = Transacciones.run(:crear, "alta_cuenta", args_cuenta_2)
 
@@ -230,7 +230,7 @@ defmodule Commands.TransaccionesCommandTest do
     # arrange
     # usuario1 ya tiene cuentas en moneda1 y moneda2.
     {:ok, usuario2} = Ledger.TestHelpers.crear_usuario_unico()
-    Ledger.TestHelpers.crear_alta_cuenta(usuario2.id, moneda1.nombre, "0.0")
+    Ledger.TestHelpers.crear_alta_cuenta(usuario2.id, moneda1.id, "0.0")
     # usuario2 solo tiene cuenta en moneda1
     args_transaccion_no_posible = %{
       "-o" => "#{usuario1.id}",

@@ -27,10 +27,10 @@ defmodule Commands.BalanceCommandTest do
   test "se puede calcular el balance de un alta cuenta con varias transacciones en una misma moneda",
        %{usuario1: usuario1, usuario2: usuario2, btc: btc} do
     # Arrange
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.nombre, 0)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.id, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.id, 0)
     {:ok, _} = TestHelpers.crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 15)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.id, 15)
 
     # Act
     {:ok, balance} = Balance.get_balance(usuario1)
@@ -43,10 +43,10 @@ defmodule Commands.BalanceCommandTest do
   test "se pueden obtener el balance de varias cuentas de un usuario para monedas distintas",
        %{usuario1: usuario1, usuario2: usuario2, btc: btc, ghr: ghr} do
     # Arrange
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.nombre, 0)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.id, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.id, 0)
     {:ok, _} = TestHelpers.crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, ghr.nombre, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, ghr.id, 10)
     {:ok, _} = TestHelpers.crear_swap(usuario1.id, ghr.id, btc.id, 2)
 
     # Act
@@ -64,10 +64,10 @@ defmodule Commands.BalanceCommandTest do
   test "se puede obtener el valor de un balance en una moneda determinada",
        %{usuario1: usuario1, usuario2: usuario2, btc: btc, ghr: ghr} do
     # Arrange
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.nombre, 10)
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.nombre, 0)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, btc.id, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario2.id, btc.id, 0)
     {:ok, _} = TestHelpers.crear_transferencia(usuario1.id, usuario2.id, btc.id, 10)
-    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, ghr.nombre, 10)
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario1.id, ghr.id, 10)
     {:ok, _} = TestHelpers.crear_swap(usuario1.id, ghr.id, btc.id, 2)
 
     # Act

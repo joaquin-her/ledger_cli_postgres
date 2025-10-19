@@ -196,7 +196,7 @@ defmodule TestCommandMonedas do
 
     {:ok, _} =
       Transacciones.run(:crear, "alta_cuenta", %{
-        "-m" => "#{moneda.nombre}",
+        "-m" => "#{moneda.id}",
         "-u" => "#{usuario.id}",
         "-a" => "10"
       })
