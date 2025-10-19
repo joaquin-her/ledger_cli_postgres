@@ -32,6 +32,14 @@ defmodule Ledger.Commands.Transacciones do
     end
   end
 
+  def run(:ver, args) do
+    with {:ok, id} <- Utils.validate_id(args["-id"], "-id") do
+      ver_transaccion(id)
+    else
+      {:error, mensaje} ->
+        {:error, "ver_transaccion: #{mensaje}"}
+    end
+  end
 
   @doc """
   ## Crear
@@ -199,7 +207,7 @@ defmodule Ledger.Commands.Transacciones do
   end
 
   @spec ver_transaccion(any()) :: {:error, <<_::200>>} | {:ok, any()}
-  def ver_transaccion(id_transaccion) do
+  defp ver_transaccion(id_transaccion) do
     with {:ok, id} <- Utils.validate_id(id_transaccion) do
       case Ledger.Repo.get(Transaccion, id) do
         nil ->

@@ -233,10 +233,23 @@ defmodule LedgerTest do
     {:ok, usuario} = TestHelpers.crear_usuario_unico()
     {:ok, transaccion} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
     input = String.split("ver_transaccion -id=#{transaccion.id}")
-    esperado = ""
+    esperado = "#{transaccion.id} | alta_cuenta | 0 | USDT | USDT | #{usuario.nombre_usuario} | #{usuario.nombre_usuario}\n"
     assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 
-  test "" do
+  test "realizar una transferencia devuelve informacion sobre la transaccion realizada",
+  %{usuario1: usuario, usuario2: usuario2} do
+    {:ok, transaccion} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
+    input = String.split("realizar_transferencia -o=#{usuario.id} -d=#{usuario2.id} -m=1 -a=0.5")
+    esperado = "| transferencia | 0.5 | USDT | USDT | joaquin | francisco\n" #+1 porque es la que le sigue
+    assert capture_io(fn -> CLI.main(input) end) =~ esperado
+  end
+
+  test "realizar una transferencia con algun error devuelve informacion sobre la equivocacion",
+  %{usuario1: usuario, usuario2: usuario2} do
+    {:ok, _} = TestHelpers.crear_alta_cuenta(usuario.id, 1, 0)
+    input = String.split("realizar_transferencia -o=#{usuario.id} -d=#{usuario2.id} -m=4 -a=0.5")
+    esperado = "[error] realizar_transferencia: get_cuenta: cuenta de usuario 1 no encontrada para moneda id 4\n"
+    assert capture_io(fn -> CLI.main(input) end) == esperado
   end
 end

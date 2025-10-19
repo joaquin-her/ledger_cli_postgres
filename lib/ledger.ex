@@ -47,13 +47,25 @@ defmodule Ledger.CLI do
             end
 
           ["ver", "transaccion"] ->
-            Commands.Transacciones.ver_transaccion(arguments)
+            case Commands.Transacciones.run(:ver, arguments) do
+              {:ok, transaccion} -> print_transaccion(transaccion)
+              {:error, error} -> IO.puts("[error] #{error}")
+            end
 
           ["realizar", tipo] ->
-            Commands.Transacciones.run(:crear, tipo, arguments)
+            case Commands.Transacciones.run(:crear, tipo, arguments) do
+              {:ok, transaccion} ->
+                print_transaccion(transaccion)
+              {:error, error} -> IO.puts("[error] #{error}")
+            end
 
           ["deshacer", tipo] ->
-            Commands.Transacciones.deshacer_transaccion(tipo, arguments)
+            case Commands.Transacciones.deshacer_transaccion(tipo, arguments) do
+              {:ok, transaccion} ->
+                print_transaccion(transaccion)
+              {:error, error} -> IO.puts("[error] #{error}")
+            end
+
 
           _ ->
             {:error, "ledgerCLI: Commando desconocido"}
@@ -103,16 +115,16 @@ defmodule Ledger.CLI do
         "usuario: id: #{usuario.id}, nombre: #{usuario.nombre_usuario}, birthdate: #{usuario.fecha_nacimiento}"
       )
 
-  defp handle_transacciones(transacciones \\ %Transaccion{}) do
+  defp handle_transacciones(transacciones) do
     transacciones
-    |> Ledger.Repo.preload([
-      :moneda_destino,
-      :moneda_origen,
-      cuenta_origen: [:usuario],
-      cuenta_destino: [:usuario]
-    ])
     |> Enum.each(fn t ->
-      print_transaccion(%{
+      t
+      |> print_transaccion()
+    end)
+  end
+
+  defp format_transaccion(t) do
+    %{
         id: t.id,
         tipo: t.tipo,
         monto: t.monto,
@@ -120,11 +132,22 @@ defmodule Ledger.CLI do
         moneda_destino: t.moneda_destino.nombre,
         titular_origen: t.cuenta_origen.usuario.nombre_usuario,
         titular_destino: t.cuenta_destino.usuario.nombre_usuario
-      })
-    end)
+      }
   end
 
-  defp print_transaccion(t) do
+  defp preload_transaccion(transaccion) do
+    transaccion
+    |> Ledger.Repo.preload([
+      :moneda_destino,
+      :moneda_origen,
+      cuenta_origen: [:usuario],
+      cuenta_destino: [:usuario]
+    ])
+  end
+
+  defp print_transaccion(transaccion) do
+    t = preload_transaccion(transaccion)
+      |> format_transaccion()
     IO.puts(
       "#{t.id} | #{t.tipo} | #{t.monto} | #{t.moneda_origen} | #{t.moneda_destino} | #{t.titular_origen} | #{t.titular_destino}"
     )
